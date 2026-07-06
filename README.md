@@ -2,11 +2,11 @@
 
 A WordPress plugin that wraps [The Events Calendar](https://theeventscalendar.com/) with a staff-friendly interface for managing recurring animal shelter programs — BINGO nights, spay/neuter clinics, adoption events, and more. Programs are a custom post type that shelter staff manage from the WordPress admin; the plugin automatically generates individual TEC event instances on a daily cron schedule.
 
-Built on the same layered architecture as [vcpahumane-petstablished-sync](https://github.com/jwincek/vcpahumane-petstablished-sync).
+Built on the same layered architecture as the shelter-pet-sync plugin.
 
 ## Requirements
 
-- WordPress 6.9+
+- WordPress 6.7+ (the Abilities API integration activates on 6.9+)
 - PHP 8.1+
 - [The Events Calendar](https://wordpress.org/plugins/the-events-calendar/) (free version)
 
@@ -14,7 +14,7 @@ Built on the same layered architecture as [vcpahumane-petstablished-sync](https:
 
 1. Download or clone into `wp-content/plugins/shelter-events-wrapper/`.
 2. Activate **The Events Calendar** first, then activate **Shelter Events Wrapper**.
-3. On activation, the plugin imports two starter programs (BINGO Night and Feline Spay/Neuter Clinic) from the seed data in `config/events.json`.
+3. On activation, the plugin imports two starter programs (BINGO! and Feline Spay/Neuter Clinic) from the seed data in `config/events.json`.
 4. Navigate to **Events → All Programs** to manage programs, or **Events → Generate Events** to trigger event creation.
 
 ---
@@ -239,6 +239,8 @@ npm run lint:css    # CSS lint
 - **Blackout dates** — Global blackout dates (Events → Generate Events) and per-program blackout dates (program metabox). Dates in either list are skipped during event generation. Pre-existing events on blackout dates are flagged in the admin UI.
 - **REST endpoint** — `POST /shelter-events/v1/replace` to cancel + create replacement programmatically.
 - **Abilities API** — `shelter_replace_event` ability registered for WP 6.9+.
+- **Uninstall options** — deleting the plugin preserves all data by default; an opt-in setting on the Generate page enables full cleanup instead.
+- **WordPress.org release prep** — public identity renamed to `shelter-events-wrapper`, added `readme.txt`/`LICENSE`/`.distignore`, security and escaping hardening throughout, and the block editor script rewritten to run without a build step.
 
 #### 2.1.0
 - **Event sync on program save** — all future events are auto-updated when a program changes. Staff can opt in to updating past events per-save.
@@ -246,7 +248,6 @@ npm run lint:css    # CSS lint
 - **Help page** — `Events → Help` renders the README as a staff guide directly in the dashboard.
 - **Venue/Organizer dedup fix** — resolved duplicate creation caused by `get_posts()` not supporting title queries; now uses `$wpdb` exact title match.
 - **Venue/Organizer publish status** — new entries are created as `publish`; existing drafts are auto-promoted.
-- **AJAX 502 fix** — block registration and admin class are skipped during AJAX requests; `plugins_loaded` priority bumped to 20.
 - Added `shelter_events_event_synced` action hook.
 
 #### 2.0.0

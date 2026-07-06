@@ -1,0 +1,18 @@
+# Files excluded from the distributed plugin build (`wp dist-archive`, and the
+# WordPress.org deploy). Runtime needs none of these — the plugin autoloads its
+# own classes, so there is no Composer dependency to ship. README.md stays in
+# the build: the in-dashboard Help page renders it.
+/.git
+/.github
+/.gitignore
+/.distignore
+/node_modules
+/vendor
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/phpcs.xml
+/phpcs.xml.dist
+/.wp-env.json
+/CHANGELOG.md

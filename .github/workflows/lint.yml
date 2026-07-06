@@ -45,3 +45,33 @@ jobs:
 
       - name: Lint CSS
         run: npm run lint:css
+
+  plugin-check:
+    name: Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Run Plugin Check against a distribution copy with dev tooling removed,
+      # mirroring .distignore so the check sees only what ships. README.md is
+      # kept — the in-dashboard Help page renders it.
+      - name: Build distribution copy
+        run: |
+          mkdir -p build/shelter-events-wrapper
+          rsync -a \
+            --exclude='.git' --exclude='.github' --exclude='.gitignore' \
+            --exclude='.distignore' --exclude='node_modules' --exclude='vendor' \
+            --exclude='composer.json' --exclude='composer.lock' \
+            --exclude='package.json' --exclude='package-lock.json' \
+            --exclude='phpcs.xml.dist' --exclude='.wp-env.json' \
+            --exclude='CHANGELOG.md' --exclude='build' \
+            ./ build/shelter-events-wrapper/
+
+      - name: Run Plugin Check
+        uses: WordPress/plugin-check-action@v1
+        with:
+          build-dir: ./build/shelter-events-wrapper
+          # Direct queries are confined to venue/organizer title lookups and
+          # uninstall cleanup, all prepared and annotated; those surface as
+          # warnings. Fail the job only on errors.
+          ignore-warnings: true
