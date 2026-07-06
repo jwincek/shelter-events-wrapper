@@ -1,13 +1,17 @@
 <?php
 /**
  * Plugin Name: Shelter Events Wrapper
- * Description: Manages recurring shelter events (BINGO, clinics, etc.) as a custom post type with a staff-friendly UI, generating TEC events automatically via WP-Cron.
- * Version:     2.0.0
+ * Plugin URI: https://github.com/jwincek/vcpahumane-shelter-events-wrapper
+ * Description: Manages recurring shelter events (BINGO, clinics, etc.) as a custom post type with a staff-friendly UI, generating The Events Calendar events automatically via WP-Cron.
+ * Version: 2.2.0
  * Requires at least: 6.7
  * Requires PHP: 8.1
- * Author:      VCPA Humane Society
+ * Requires Plugins: the-events-calendar
+ * Author: VCPA Humane Society
+ * Author URI: https://vcpahumane.org
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: shelter-events
- * License:     GPL-2.0-or-later
  *
  * @package Shelter_Events
  */
@@ -19,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin constants ──────────────────────────────────────────────────────────
-define( 'SHELTER_EVENTS_VERSION', '2.0.0' );
+define( 'SHELTER_EVENTS_VERSION', '2.2.0' );
 define( 'SHELTER_EVENTS_FILE', __FILE__ );
 define( 'SHELTER_EVENTS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SHELTER_EVENTS_URL', plugin_dir_url( __FILE__ ) );
@@ -57,12 +61,16 @@ register_activation_hook( __FILE__, function (): void {
 	\Shelter_Events\Core\Program_CPT::register_post_type();
 	\Shelter_Events\Core\Taxonomy_Registry::register_taxonomies();
 
-	// Import JSON-defined programs as CPT posts (only on first activation).
-	\Shelter_Events\Core\Program_Importer::import_from_config();
+	// Seed programs and schedule generation only when The Events Calendar is
+	// active. The `Requires Plugins` header enforces this on WP 6.5+; this
+	// guard covers manual installs. The import flag is only set once the
+	// import actually runs, so it happens on the next activation with TEC.
+	if ( class_exists( 'Tribe__Events__Main' ) ) {
+		\Shelter_Events\Core\Program_Importer::import_from_config();
 
-	// Schedule cron.
-	if ( ! wp_next_scheduled( 'shelter_events_generate_recurring' ) ) {
-		wp_schedule_event( time(), 'daily', 'shelter_events_generate_recurring' );
+		if ( ! wp_next_scheduled( 'shelter_events_generate_recurring' ) ) {
+			wp_schedule_event( time(), 'daily', 'shelter_events_generate_recurring' );
+		}
 	}
 
 	flush_rewrite_rules();

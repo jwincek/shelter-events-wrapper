@@ -277,6 +277,44 @@ final class Event_Generator {
 
 	// ── Helpers ───────────────────────────────────────────────────────────────
 
+	/**
+	 * Read an event's start datetime from TEC meta.
+	 *
+	 * Returns null when the meta is missing or malformed, so callers can
+	 * skip the event instead of fataling on a bad DateTime construction.
+	 * All TEC datetime-meta reads should go through these two helpers.
+	 *
+	 * @param int $event_id Event post ID.
+	 * @return DateTime|null
+	 */
+	public static function get_event_start( int $event_id ): ?DateTime {
+		return self::meta_to_datetime( $event_id, '_EventStartDate' );
+	}
+
+	/**
+	 * Read an event's end datetime from TEC meta.
+	 *
+	 * @param int $event_id Event post ID.
+	 * @return DateTime|null
+	 */
+	public static function get_event_end( int $event_id ): ?DateTime {
+		return self::meta_to_datetime( $event_id, '_EventEndDate' );
+	}
+
+	private static function meta_to_datetime( int $event_id, string $meta_key ): ?DateTime {
+		$value = get_post_meta( $event_id, $meta_key, true );
+
+		if ( ! is_string( $value ) || '' === $value ) {
+			return null;
+		}
+
+		try {
+			return new DateTime( $value );
+		} catch ( \Exception $e ) {
+			return null;
+		}
+	}
+
 	public static function make_hash( string $slug, string $date ): string {
 		return hash( 'sha256', "shelter-event:{$slug}:{$date}" );
 	}

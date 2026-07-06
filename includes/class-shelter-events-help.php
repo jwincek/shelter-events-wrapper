@@ -269,10 +269,13 @@ class Shelter_Events_Help {
 		// Italic.
 		$text = preg_replace( '/\*(.+?)\*/', '<em>$1</em>', $text );
 
-		// Links.
-		$text = preg_replace(
+		// Links. Escape the URL so a bad target in the bundled README can
+		// never yield a javascript: (or otherwise unsafe) href.
+		$text = preg_replace_callback(
 			'/\[([^\]]+)\]\(([^)]+)\)/',
-			'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+			static function ( array $m ): string {
+				return '<a href="' . esc_url( $m[2] ) . '" target="_blank" rel="noopener noreferrer">' . $m[1] . '</a>';
+			},
 			$text
 		);
 

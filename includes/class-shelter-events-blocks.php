@@ -94,12 +94,16 @@ class Shelter_Events_Blocks {
 		?>
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<?php foreach ( $events as $event ) :
-				$event_id    = $event->ID;
-				$start       = get_post_meta( $event_id, '_EventStartDate', true );
-				$end         = get_post_meta( $event_id, '_EventEndDate', true );
-				$cancelled   = (bool) get_post_meta( $event_id, '_shelter_cancelled', true );
-				$start_dt    = new DateTime( $start );
-				$end_dt      = new DateTime( $end );
+				$event_id = $event->ID;
+				$start_dt = \Shelter_Events\Core\Event_Generator::get_event_start( $event_id );
+				$end_dt   = \Shelter_Events\Core\Event_Generator::get_event_end( $event_id );
+
+				// Skip events with missing or malformed date meta.
+				if ( ! $start_dt || ! $end_dt ) {
+					continue;
+				}
+
+				$cancelled    = (bool) get_post_meta( $event_id, '_shelter_cancelled', true );
 				$program_slug = get_post_meta( $event_id, '_shelter_program_slug', true );
 			?>
 				<article class="shelter-event-item<?php echo $cancelled ? ' shelter-event-item--cancelled' : ''; ?>"

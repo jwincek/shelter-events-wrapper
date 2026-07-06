@@ -521,8 +521,11 @@ final class Program_CPT {
 	 * Save metabox data.
 	 */
 	public static function save_meta( int $post_id, \WP_Post $post ): void {
-		if ( ! isset( $_POST['shelter_program_nonce'] ) ||
-			! wp_verify_nonce( $_POST['shelter_program_nonce'], 'shelter_program_save' ) ) {
+		$nonce = isset( $_POST['shelter_program_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['shelter_program_nonce'] ) )
+			: '';
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'shelter_program_save' ) ) {
 			return;
 		}
 
@@ -536,7 +539,7 @@ final class Program_CPT {
 
 		// Recurrence days is a checkbox array.
 		$days = isset( $_POST['shelter_prog_recurrence_days'] )
-			? array_map( 'sanitize_text_field', (array) $_POST['shelter_prog_recurrence_days'] )
+			? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['shelter_prog_recurrence_days'] ) )
 			: [];
 		$valid_days = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
 		$days = array_intersect( $days, $valid_days );
@@ -561,13 +564,13 @@ final class Program_CPT {
 
 		foreach ( $text_fields as $field ) {
 			$key   = 'shelter_prog_' . $field;
-			$value = isset( $_POST[ $key ] ) ? sanitize_text_field( $_POST[ $key ] ) : '';
+			$value = isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
 			update_post_meta( $post_id, self::META_PREFIX . $field, $value );
 		}
 
 		// Blackout dates — textarea, sanitized to preserve newlines and validate format.
 		$raw_dates   = isset( $_POST['shelter_prog_blackout_dates'] )
-			? sanitize_textarea_field( $_POST['shelter_prog_blackout_dates'] )
+			? sanitize_textarea_field( wp_unslash( $_POST['shelter_prog_blackout_dates'] ) )
 			: '';
 		$valid_dates = self::parse_blackout_dates( $raw_dates );
 		update_post_meta( $post_id, self::META_PREFIX . 'blackout_dates', implode( "\n", $valid_dates ) );

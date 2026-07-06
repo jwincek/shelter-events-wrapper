@@ -95,7 +95,7 @@ final class Provider {
 		$post     = get_post( $event_id );
 
 		if ( ! $post || $post->post_type !== 'tribe_events' ) {
-			return [ 'success' => false, 'error' => 'Event not found.' ];
+			return [ 'success' => false, 'error' => __( 'Event not found.', 'shelter-events' ) ];
 		}
 
 		update_post_meta( $event_id, '_shelter_cancelled', '1' );
@@ -109,7 +109,7 @@ final class Provider {
 		return [
 			'success'  => true,
 			'event_id' => $event_id,
-			'message'  => 'Event marked as cancelled.',
+			'message'  => __( 'Event marked as cancelled.', 'shelter-events' ),
 		];
 	}
 
@@ -125,15 +125,15 @@ final class Provider {
 		$post     = get_post( $event_id );
 
 		if ( ! $post || $post->post_type !== 'tribe_events' ) {
-			return [ 'success' => false, 'error' => 'Event not found.' ];
+			return [ 'success' => false, 'error' => __( 'Event not found.', 'shelter-events' ) ];
 		}
 
 		if ( get_post_meta( $event_id, '_shelter_replaced_by', true ) ) {
-			return [ 'success' => false, 'error' => 'Event has already been replaced.' ];
+			return [ 'success' => false, 'error' => __( 'Event has already been replaced.', 'shelter-events' ) ];
 		}
 
 		if ( get_post_meta( $event_id, '_shelter_cancelled', true ) ) {
-			return [ 'success' => false, 'error' => 'Event is already cancelled.' ];
+			return [ 'success' => false, 'error' => __( 'Event is already cancelled.', 'shelter-events' ) ];
 		}
 
 		// Read the original event's scheduling data.
@@ -147,7 +147,7 @@ final class Provider {
 
 		// Cancel the original event.
 		update_post_meta( $event_id, '_shelter_cancelled', '1' );
-		update_post_meta( $event_id, '_shelter_cancel_reason', 'Replaced by a special event.' );
+		update_post_meta( $event_id, '_shelter_cancel_reason', __( 'Replaced by a special event.', 'shelter-events' ) );
 
 		$original_title = $post->post_title;
 		if ( strpos( $original_title, '[CANCELLED]' ) !== 0 ) {
@@ -178,7 +178,7 @@ final class Provider {
 		$replacement = tribe_events()->set_args( $replacement_args )->create();
 
 		if ( ! $replacement instanceof \WP_Post ) {
-			return [ 'success' => false, 'error' => 'Failed to create replacement event.' ];
+			return [ 'success' => false, 'error' => __( 'Failed to create replacement event.', 'shelter-events' ) ];
 		}
 
 		// Cross-reference the pair.

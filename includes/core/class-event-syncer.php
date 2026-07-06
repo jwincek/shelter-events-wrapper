@@ -42,8 +42,11 @@ final class Event_Syncer {
 			return;
 		}
 
-		if ( ! isset( $_POST['shelter_program_nonce'] ) ||
-			! wp_verify_nonce( $_POST['shelter_program_nonce'], 'shelter_program_save' ) ) {
+		$nonce = isset( $_POST['shelter_program_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['shelter_program_nonce'] ) )
+			: '';
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'shelter_program_save' ) ) {
 			return;
 		}
 

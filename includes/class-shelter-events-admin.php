@@ -40,15 +40,17 @@ class Shelter_Events_Admin {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_POST['shelter_generate_nonce'], 'shelter_generate_events' ) ) {
-			wp_die( __( 'Security check failed.', 'shelter-events' ) );
+		$nonce = sanitize_text_field( wp_unslash( $_POST['shelter_generate_nonce'] ) );
+
+		if ( ! wp_verify_nonce( $nonce, 'shelter_generate_events' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events' ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( __( 'Insufficient permissions.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events' ) );
 		}
 
-		$program_slug = sanitize_text_field( $_POST['program'] ?? '' );
+		$program_slug = sanitize_text_field( wp_unslash( $_POST['program'] ?? '' ) );
 		$weeks        = (int) ( $_POST['weeks'] ?? 8 );
 		$dry_run      = ! empty( $_POST['dry_run'] );
 
@@ -78,15 +80,17 @@ class Shelter_Events_Admin {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_POST['shelter_blackout_nonce'], 'shelter_save_blackout_dates' ) ) {
-			wp_die( __( 'Security check failed.', 'shelter-events' ) );
+		$nonce = sanitize_text_field( wp_unslash( $_POST['shelter_blackout_nonce'] ) );
+
+		if ( ! wp_verify_nonce( $nonce, 'shelter_save_blackout_dates' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events' ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( __( 'Insufficient permissions.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events' ) );
 		}
 
-		$raw   = sanitize_textarea_field( $_POST['shelter_blackout_dates'] ?? '' );
+		$raw   = sanitize_textarea_field( wp_unslash( $_POST['shelter_blackout_dates'] ?? '' ) );
 		$dates = \Shelter_Events\Core\Program_CPT::parse_blackout_dates( $raw );
 
 		update_option( self::BLACKOUT_OPTION, $dates );
@@ -156,14 +160,15 @@ class Shelter_Events_Admin {
 	 */
 	public function handle_replace_action(): void {
 		$event_id = (int) ( $_GET['event_id'] ?? 0 );
+		$nonce    = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) );
 
 		if ( ! $event_id
-			|| ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'shelter_replace_event_' . $event_id ) ) {
-			wp_die( __( 'Security check failed.', 'shelter-events' ) );
+			|| ! wp_verify_nonce( $nonce, 'shelter_replace_event_' . $event_id ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events' ) );
 		}
 
 		if ( ! current_user_can( 'edit_others_posts' ) ) {
-			wp_die( __( 'Insufficient permissions.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events' ) );
 		}
 
 		$result = \Shelter_Events\Abilities\Provider::handle_shelter_replace_event( [
@@ -171,7 +176,7 @@ class Shelter_Events_Admin {
 		] );
 
 		if ( ! $result['success'] ) {
-			wp_die( $result['error'] ?? __( 'Replace failed.', 'shelter-events' ) );
+			wp_die( esc_html( $result['error'] ?? __( 'Replace failed.', 'shelter-events' ) ) );
 		}
 
 		// Redirect to the block editor for the new replacement event.
@@ -211,12 +216,14 @@ class Shelter_Events_Admin {
 				</a>
 			</h1>
 
+			<?php // phpcs:disable WordPress.Security.NonceVerification.Recommended -- display-only success notices after a nonce-verified redirect. ?>
 			<?php if ( isset( $_GET['generated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
 					<p>
 						<?php
+						$was_dry_run = '1' === sanitize_text_field( wp_unslash( $_GET['dry_run'] ?? '0' ) );
 						echo esc_html(
-							( $_GET['dry_run'] ?? '0' ) === '1'
+							$was_dry_run
 								? __( 'Dry run complete — no events were created.', 'shelter-events' )
 								: __( 'Events generated successfully!', 'shelter-events' )
 						);
@@ -230,6 +237,7 @@ class Shelter_Events_Admin {
 					<p><?php esc_html_e( 'Global blackout dates saved.', 'shelter-events' ); ?></p>
 				</div>
 			<?php endif; ?>
+			<?php // phpcs:enable WordPress.Security.NonceVerification.Recommended ?>
 
 			<!-- Active Programs Overview -->
 			<div class="shelter-card">
@@ -248,10 +256,13 @@ class Shelter_Events_Admin {
 				<?php if ( empty( $programs ) ) : ?>
 					<p class="description">
 						<?php
-						printf(
-							/* translators: %s = URL to add new program */
-							__( 'No active programs found. <a href="%s">Create one</a> to get started.', 'shelter-events' ),
-							esc_url( admin_url( 'post-new.php?post_type=shelter_program' ) )
+						echo wp_kses(
+							sprintf(
+								/* translators: %s = URL to add new program */
+								__( 'No active programs found. <a href="%s">Create one</a> to get started.', 'shelter-events' ),
+								esc_url( admin_url( 'post-new.php?post_type=shelter_program' ) )
+							),
+							[ 'a' => [ 'href' => [] ] ]
 						);
 						?>
 					</p>
@@ -348,11 +359,16 @@ class Shelter_Events_Admin {
 							</thead>
 							<tbody>
 								<?php foreach ( $upcoming as $event ) :
-									$event_start   = get_post_meta( $event->ID, '_EventStartDate', true );
+									$start_dt = \Shelter_Events\Core\Event_Generator::get_event_start( $event->ID );
+
+									// Skip events with missing or malformed date meta.
+									if ( ! $start_dt ) {
+										continue;
+									}
+
 									$programme     = get_post_meta( $event->ID, '_shelter_program_slug', true );
 									$cancelled     = (bool) get_post_meta( $event->ID, '_shelter_cancelled', true );
 									$replaced_by   = (int) get_post_meta( $event->ID, '_shelter_replaced_by', true );
-									$start_dt      = new DateTime( $event_start );
 									$event_ymd     = $start_dt->format( 'Y-m-d' );
 									$on_blackout   = isset( $global_blackout_set[ $event_ymd ] );
 								?>
@@ -414,6 +430,7 @@ class Shelter_Events_Admin {
 					<p class="description">
 						<?php
 						printf(
+							/* translators: %s = formatted date and time of the next scheduled generation */
 							esc_html__( 'Next automatic generation: %s', 'shelter-events' ),
 							esc_html( wp_date( 'F j, Y \a\t g:i A', $next_cron ) )
 						);
