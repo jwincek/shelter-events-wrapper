@@ -70,7 +70,7 @@ By default your programs, generated events, and settings are all preserved. If y
 * New: Replace action on generated events — cancels the original and opens a pre-populated draft replacement in the block editor.
 * New: Global and per-program blackout dates skipped during generation, with admin flagging of pre-existing events on blackout days.
 * New: Variable-pricing flag displays "Varies" across all cost surfaces.
-* New: `POST /shelter-events/v1/replace` REST endpoint and `shelter_replace_event` ability.
+* New: `POST /shelter-events/v1/replace` REST endpoint and `shelter-events/replace-event` ability.
 * New: Uninstall support with preserve-by-default data retention and an opt-in full cleanup.
 * Fixed: block editor script now loads correctly in the editor.
 * Fixed: seeded programs are imported with their organizer attached.

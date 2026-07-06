@@ -238,7 +238,7 @@ npm run lint:css    # CSS lint
 - **Variable pricing** — "Variable pricing" checkbox on programs. Displays "Varies" across all TEC cost surfaces (single event, calendar views, event list block, REST API) via the `tribe_get_cost` filter.
 - **Blackout dates** — Global blackout dates (Events → Generate Events) and per-program blackout dates (program metabox). Dates in either list are skipped during event generation. Pre-existing events on blackout dates are flagged in the admin UI.
 - **REST endpoint** — `POST /shelter-events/v1/replace` to cancel + create replacement programmatically.
-- **Abilities API** — `shelter_replace_event` ability registered for WP 6.9+.
+- **Abilities API** — `shelter-events/replace-event` ability registered for WP 6.9+.
 - **Uninstall options** — deleting the plugin preserves all data by default; an opt-in setting on the Generate page enables full cleanup instead.
 - **WordPress.org release prep** — public identity renamed to `shelter-events-wrapper`, added `readme.txt`/`LICENSE`/`.distignore`, security and escaping hardening throughout, and the block editor script rewritten to run without a build step.
 

@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and pre-existing events on blackout dates are flagged in the admin UI.
 - Variable-pricing flag on programs — displays "Varies" across all The Events
   Calendar cost surfaces via the `tribe_get_cost` filter.
-- `POST /shelter-events/v1/replace` REST endpoint and `shelter_replace_event`
+- `POST /shelter-events/v1/replace` REST endpoint and `shelter-events/replace-event`
   ability (WP 6.9+).
 - `uninstall.php` with preserve-by-default data retention: cron and transients
   are always cleaned up; programs, generated events, and options are removed

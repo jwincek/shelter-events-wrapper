@@ -20,31 +20,44 @@ final class Provider {
 
 	/**
 	 * Register every ability declared in abilities.json with the Abilities API.
+	 *
+	 * Ability names are namespaced per the WP 6.9 requirement (e.g.
+	 * "shelter-events/generate-events"); the handler method is derived from
+	 * the part after the slash ("generate-events" → handle_shelter_generate_events).
 	 */
 	public static function register(): void {
 		$abilities = Config::get_item( 'abilities', 'abilities', array() );
 
-		foreach ( $abilities as $slug => $definition ) {
+		foreach ( $abilities as $name => $definition ) {
 			if ( ! function_exists( 'wp_register_ability' ) ) {
 				break;
 			}
 
-			wp_register_ability(
-				$slug,
-				array(
-					'label'               => $definition['label'],
-					'description'         => $definition['description'],
-					'category'            => $definition['category'],
-					'permission_callback' => self::build_permission_callback( $definition['permission_callback'] ?? 'manage_options' ),
-					'callback'            => array( __CLASS__, "handle_{$slug}" ),
-					'schema'              => $definition['schema'] ?? array(),
-				)
+			$local  = substr( (string) $name, strpos( (string) $name, '/' ) + 1 );
+			$method = 'handle_shelter_' . str_replace( '-', '_', $local );
+
+			if ( ! method_exists( __CLASS__, $method ) ) {
+				continue;
+			}
+
+			$args = array(
+				'label'               => $definition['label'],
+				'description'         => $definition['description'],
+				'category'            => $definition['category'],
+				'permission_callback' => self::build_permission_callback( $definition['permission_callback'] ?? 'manage_options' ),
+				'execute_callback'    => array( __CLASS__, $method ),
 			);
+
+			if ( ! empty( $definition['schema'] ) ) {
+				$args['input_schema'] = $definition['schema'];
+			}
+
+			wp_register_ability( $name, $args );
 		}
 	}
 
 	/**
-	 * Handle: shelter_generate_events.
+	 * Handle: shelter-events/generate-events.
 	 *
 	 * @param array $args Ability input: weeks, dry_run, and optional program slug.
 	 * @return array Result payload with per-program generation results.
@@ -74,7 +87,7 @@ final class Provider {
 	}
 
 	/**
-	 * Handle: shelter_list_programs.
+	 * Handle: shelter-events/list-programs.
 	 *
 	 * @param array $args Ability input (unused; the ability takes no parameters).
 	 * @return array Result payload listing the active programs.
@@ -103,7 +116,7 @@ final class Provider {
 	}
 
 	/**
-	 * Handle: shelter_cancel_event.
+	 * Handle: shelter-events/cancel-event.
 	 *
 	 * @param array $args Ability input: event_id and optional reason.
 	 * @return array Result payload with success flag and message or error.
@@ -137,7 +150,7 @@ final class Provider {
 	}
 
 	/**
-	 * Handle: shelter_replace_event
+	 * Handle: shelter-events/replace-event
 	 *
 	 * Cancels a generated event and creates a draft replacement pre-populated
 	 * with the original's date, time, venue, and organizer. The replacement
