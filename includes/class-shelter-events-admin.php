@@ -10,24 +10,41 @@
 
 declare( strict_types=1 );
 
+/**
+ * Admin page for event generation, blackout dates, and uninstall settings.
+ */
 class Shelter_Events_Admin {
 
-	/** @var string Option key for global blackout dates. */
+	/**
+	 * Option key for global blackout dates.
+	 *
+	 * @var string
+	 */
 	public const BLACKOUT_OPTION = 'shelter_events_blackout_dates';
 
-	/** @var string Option key for the uninstall data-removal opt-in. */
+	/**
+	 * Option key for the uninstall data-removal opt-in.
+	 *
+	 * @var string
+	 */
 	public const DELETE_DATA_OPTION = 'shelter_events_delete_data_on_uninstall';
 
+	/**
+	 * Hook the admin page, form handlers, assets, and row action.
+	 */
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
-		add_action( 'admin_init', [ $this, 'handle_generate_action' ] );
-		add_action( 'admin_init', [ $this, 'handle_blackout_save' ] );
-		add_action( 'admin_init', [ $this, 'handle_uninstall_setting_save' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'admin_post_shelter_replace_event', [ $this, 'handle_replace_action' ] );
-		add_filter( 'post_row_actions', [ $this, 'add_replace_row_action' ], 10, 2 );
+		add_action( 'admin_menu', array( $this, 'add_menu_page' ) );
+		add_action( 'admin_init', array( $this, 'handle_generate_action' ) );
+		add_action( 'admin_init', array( $this, 'handle_blackout_save' ) );
+		add_action( 'admin_init', array( $this, 'handle_uninstall_setting_save' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'admin_post_shelter_replace_event', array( $this, 'handle_replace_action' ) );
+		add_filter( 'post_row_actions', array( $this, 'add_replace_row_action' ), 10, 2 );
 	}
 
+	/**
+	 * Register the Generate Events submenu page under Events.
+	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
 			'edit.php?post_type=tribe_events',
@@ -35,10 +52,13 @@ class Shelter_Events_Admin {
 			__( 'Generate Events', 'shelter-events-wrapper' ),
 			'manage_options',
 			'shelter-events-generate',
-			[ $this, 'render_page' ]
+			array( $this, 'render_page' )
 		);
 	}
 
+	/**
+	 * Handle the Generate Now form submission and redirect back with a notice.
+	 */
 	public function handle_generate_action(): void {
 		if ( ! isset( $_POST['shelter_generate_nonce'] ) ) {
 			return;
@@ -55,24 +75,29 @@ class Shelter_Events_Admin {
 		}
 
 		$program_slug = sanitize_text_field( wp_unslash( $_POST['program'] ?? '' ) );
-		$weeks        = (int) ( $_POST['weeks'] ?? 8 );
+		$weeks        = isset( $_POST['weeks'] ) ? absint( wp_unslash( $_POST['weeks'] ) ) : 8;
 		$dry_run      = ! empty( $_POST['dry_run'] );
 
-		$args = [
-			'program' => $program_slug ?: null,
+		$args = array(
+			'program' => '' !== $program_slug ? $program_slug : null,
 			'weeks'   => $weeks,
 			'dry_run' => $dry_run,
-		];
+		);
 
 		$results = \Shelter_Events\Abilities\Provider::handle_shelter_generate_events( $args );
 
 		set_transient( 'shelter_events_last_generation', $results, 300 );
 
-		wp_safe_redirect( add_query_arg( [
-			'page'      => 'shelter-events-generate',
-			'generated' => '1',
-			'dry_run'   => $dry_run ? '1' : '0',
-		], admin_url( 'edit.php?post_type=tribe_events' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'      => 'shelter-events-generate',
+					'generated' => '1',
+					'dry_run'   => $dry_run ? '1' : '0',
+				),
+				admin_url( 'edit.php?post_type=tribe_events' )
+			)
+		);
 		exit;
 	}
 
@@ -99,10 +124,15 @@ class Shelter_Events_Admin {
 
 		update_option( self::BLACKOUT_OPTION, $dates );
 
-		wp_safe_redirect( add_query_arg( [
-			'page'             => 'shelter-events-generate',
-			'blackout_updated' => '1',
-		], admin_url( 'edit.php?post_type=tribe_events' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'             => 'shelter-events-generate',
+					'blackout_updated' => '1',
+				),
+				admin_url( 'edit.php?post_type=tribe_events' )
+			)
+		);
 		exit;
 	}
 
@@ -126,10 +156,15 @@ class Shelter_Events_Admin {
 
 		update_option( self::DELETE_DATA_OPTION, ! empty( $_POST['shelter_delete_data_on_uninstall'] ) );
 
-		wp_safe_redirect( add_query_arg( [
-			'page'             => 'shelter-events-generate',
-			'settings_updated' => '1',
-		], admin_url( 'edit.php?post_type=tribe_events' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'             => 'shelter-events-generate',
+					'settings_updated' => '1',
+				),
+				admin_url( 'edit.php?post_type=tribe_events' )
+			)
+		);
 		exit;
 	}
 
@@ -139,14 +174,18 @@ class Shelter_Events_Admin {
 	 * @return string[]
 	 */
 	public static function get_global_blackout_dates(): array {
-		return get_option( self::BLACKOUT_OPTION, [] );
+		return get_option( self::BLACKOUT_OPTION, array() );
 	}
 
 	/**
 	 * Add a "Replace" row action to shelter-generated events in the TEC events list.
+	 *
+	 * @param array    $actions Existing row actions.
+	 * @param \WP_Post $post    Post for the current row.
+	 * @return array Row actions, with "Replace" added for eligible events.
 	 */
 	public function add_replace_row_action( array $actions, \WP_Post $post ): array {
-		if ( $post->post_type !== 'tribe_events' ) {
+		if ( 'tribe_events' !== $post->post_type ) {
 			return $actions;
 		}
 
@@ -190,7 +229,7 @@ class Shelter_Events_Admin {
 	 * a draft replacement, and redirects to the TEC block editor.
 	 */
 	public function handle_replace_action(): void {
-		$event_id = (int) ( $_GET['event_id'] ?? 0 );
+		$event_id = isset( $_GET['event_id'] ) ? absint( wp_unslash( $_GET['event_id'] ) ) : 0;
 		$nonce    = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) );
 
 		if ( ! $event_id
@@ -202,9 +241,11 @@ class Shelter_Events_Admin {
 			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events-wrapper' ) );
 		}
 
-		$result = \Shelter_Events\Abilities\Provider::handle_shelter_replace_event( [
-			'event_id' => $event_id,
-		] );
+		$result = \Shelter_Events\Abilities\Provider::handle_shelter_replace_event(
+			array(
+				'event_id' => $event_id,
+			)
+		);
 
 		if ( ! $result['success'] ) {
 			wp_die( esc_html( $result['error'] ?? __( 'Replace failed.', 'shelter-events-wrapper' ) ) );
@@ -215,9 +256,14 @@ class Shelter_Events_Admin {
 		exit;
 	}
 
+	/**
+	 * Enqueue admin CSS on the Generate Events page and the TEC events list.
+	 *
+	 * @param string $hook Current admin page hook suffix.
+	 */
 	public function enqueue_admin_assets( string $hook ): void {
 		$is_generate_page = str_contains( $hook, 'shelter-events-generate' );
-		$is_events_list   = $hook === 'edit.php'
+		$is_events_list   = 'edit.php' === $hook
 			&& ( get_current_screen()->post_type ?? '' ) === 'tribe_events';
 
 		if ( ! $is_generate_page && ! $is_events_list ) {
@@ -227,14 +273,17 @@ class Shelter_Events_Admin {
 		wp_enqueue_style(
 			'shelter-events-admin',
 			SHELTER_EVENTS_URL . 'assets/css/admin.css',
-			[],
+			array(),
 			SHELTER_EVENTS_VERSION
 		);
 	}
 
+	/**
+	 * Render the Generate Events admin page.
+	 */
 	public function render_page(): void {
 		$programs  = \Shelter_Events\Core\Program_CPT::get_active_programs();
-		$gen       = \Shelter_Events\Core\Config::get_item( 'events', 'generation', [] );
+		$gen       = \Shelter_Events\Core\Config::get_item( 'events', 'generation', array() );
 		$results   = get_transient( 'shelter_events_last_generation' );
 		$next_cron = wp_next_scheduled( 'shelter_events_generate_recurring' );
 		?>
@@ -299,7 +348,7 @@ class Shelter_Events_Admin {
 								__( 'No active programs found. <a href="%s">Create one</a> to get started.', 'shelter-events-wrapper' ),
 								esc_url( admin_url( 'post-new.php?post_type=shelter_program' ) )
 							),
-							[ 'a' => [ 'href' => [] ] ]
+							array( 'a' => array( 'href' => array() ) )
 						);
 						?>
 					</p>
@@ -321,10 +370,15 @@ class Shelter_Events_Admin {
 									<td><strong><?php echo esc_html( $prog['title'] ); ?></strong></td>
 									<td>
 										<?php
-										echo esc_html( implode( ', ', array_map(
-											fn( $d ) => ucfirst( substr( $d, 0, 3 ) ),
-											$prog['recurrence']['days']
-										) ) );
+										echo esc_html(
+											implode(
+												', ',
+												array_map(
+													fn( $d ) => ucfirst( substr( $d, 0, 3 ) ),
+													$prog['recurrence']['days']
+												)
+											)
+										);
 										?>
 									</td>
 									<td><?php echo esc_html( $prog['recurrence']['start_time'] . ' – ' . $prog['recurrence']['end_time'] ); ?></td>
@@ -336,7 +390,7 @@ class Shelter_Events_Admin {
 										else :
 											$cost = $prog['cost'];
 											echo esc_html(
-												( $cost === '0' || $cost === '' )
+												( '0' === $cost || '' === $cost )
 													? __( 'Free', 'shelter-events-wrapper' )
 													: ( $prog['currency_symbol'] ?? '$' ) . $cost
 											);
@@ -357,30 +411,33 @@ class Shelter_Events_Admin {
 			</div>
 
 			<!-- Upcoming Generated Events -->
-			<?php if ( function_exists( 'tribe_events' ) && current_user_can( 'edit_others_posts' ) ) :
+			<?php
+			if ( function_exists( 'tribe_events' ) && current_user_can( 'edit_others_posts' ) ) :
 				$global_blackout_set = array_flip( self::get_global_blackout_dates() );
-				$upcoming = get_posts( [
-					'post_type'   => 'tribe_events',
-					'post_status' => 'any',
-					'numberposts' => 20,
-					'orderby'     => 'meta_value',
-					'meta_key'    => '_EventStartDate',
-					'order'       => 'ASC',
-					'meta_query'  => [
-						'relation' => 'AND',
-						[
-							'key'     => '_shelter_program_slug',
-							'compare' => 'EXISTS',
-						],
-						[
-							'key'     => '_EventStartDate',
-							'value'   => current_time( 'Y-m-d 00:00:00' ),
-							'compare' => '>=',
-							'type'    => 'DATETIME',
-						],
-					],
-				] );
-			?>
+				$upcoming            = get_posts(
+					array(
+						'post_type'   => 'tribe_events',
+						'post_status' => 'any',
+						'numberposts' => 20,
+						'orderby'     => 'meta_value',
+						'meta_key'    => '_EventStartDate', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- admin-only overview of 20 events, ordered by TEC's start-date meta.
+						'order'       => 'ASC',
+						'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- admin-only overview; generated events are only identifiable via meta.
+							'relation' => 'AND',
+							array(
+								'key'     => '_shelter_program_slug',
+								'compare' => 'EXISTS',
+							),
+							array(
+								'key'     => '_EventStartDate',
+								'value'   => current_time( 'Y-m-d 00:00:00' ),
+								'compare' => '>=',
+								'type'    => 'DATETIME',
+							),
+						),
+					)
+				);
+				?>
 				<?php if ( ! empty( $upcoming ) ) : ?>
 					<div class="shelter-card">
 						<h2><?php esc_html_e( 'Upcoming Generated Events', 'shelter-events-wrapper' ); ?></h2>
@@ -395,7 +452,8 @@ class Shelter_Events_Admin {
 								</tr>
 							</thead>
 							<tbody>
-								<?php foreach ( $upcoming as $event ) :
+								<?php
+								foreach ( $upcoming as $event ) :
 									$start_dt = \Shelter_Events\Core\Event_Generator::get_event_start( $event->ID );
 
 									// Skip events with missing or malformed date meta.
@@ -403,12 +461,12 @@ class Shelter_Events_Admin {
 										continue;
 									}
 
-									$programme     = get_post_meta( $event->ID, '_shelter_program_slug', true );
-									$cancelled     = (bool) get_post_meta( $event->ID, '_shelter_cancelled', true );
-									$replaced_by   = (int) get_post_meta( $event->ID, '_shelter_replaced_by', true );
-									$event_ymd     = $start_dt->format( 'Y-m-d' );
-									$on_blackout   = isset( $global_blackout_set[ $event_ymd ] );
-								?>
+									$programme   = get_post_meta( $event->ID, '_shelter_program_slug', true );
+									$cancelled   = (bool) get_post_meta( $event->ID, '_shelter_cancelled', true );
+									$replaced_by = (int) get_post_meta( $event->ID, '_shelter_replaced_by', true );
+									$event_ymd   = $start_dt->format( 'Y-m-d' );
+									$on_blackout = isset( $global_blackout_set[ $event_ymd ] );
+									?>
 									<tr>
 										<td><strong><?php echo esc_html( $event->post_title ); ?></strong></td>
 										<td><?php echo esc_html( $programme ); ?></td>
@@ -544,9 +602,10 @@ class Shelter_Events_Admin {
 							<div class="shelter-blackout-layout__summary">
 								<strong><?php esc_html_e( 'Current blackout dates:', 'shelter-events-wrapper' ); ?></strong>
 								<ul class="shelter-blackout-list">
-									<?php foreach ( $global_dates as $d ) :
+									<?php
+									foreach ( $global_dates as $d ) :
 										$dt = \DateTime::createFromFormat( 'Y-m-d', $d );
-									?>
+										?>
 										<li>
 											<?php
 											echo $dt
@@ -585,7 +644,7 @@ class Shelter_Events_Admin {
 			</div>
 
 			<!-- Results -->
-			<?php if ( is_array( $results ) && ! empty( $results['programs'] ?? [] ) ) : ?>
+			<?php if ( is_array( $results ) && ! empty( $results['programs'] ?? array() ) ) : ?>
 				<div class="shelter-card">
 					<h2><?php esc_html_e( 'Last Generation Results', 'shelter-events-wrapper' ); ?></h2>
 					<?php foreach ( $results['programs'] as $slug => $events ) : ?>

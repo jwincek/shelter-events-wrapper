@@ -18,6 +18,9 @@ declare( strict_types=1 );
 
 namespace Shelter_Events\Core;
 
+/**
+ * Propagates saved program changes to the linked, already-generated TEC events.
+ */
 final class Event_Syncer {
 
 	/**
@@ -27,7 +30,7 @@ final class Event_Syncer {
 	 * has already written the new meta values before we read them.
 	 */
 	public static function init(): void {
-		add_action( 'save_post_' . Program_CPT::POST_TYPE, [ __CLASS__, 'on_program_save' ], 20, 2 );
+		add_action( 'save_post_' . Program_CPT::POST_TYPE, array( __CLASS__, 'on_program_save' ), 20, 2 );
 	}
 
 	/**
@@ -50,7 +53,7 @@ final class Event_Syncer {
 			return;
 		}
 
-		if ( $post->post_status !== 'publish' ) {
+		if ( 'publish' !== $post->post_status ) {
 			return;
 		}
 
@@ -85,44 +88,44 @@ final class Event_Syncer {
 	private static function build_program_data( int $post_id, \WP_Post $post ): array {
 		$meta = Program_CPT::get_all_meta( $post_id );
 
-		return [
+		return array(
 			'post_id'         => $post_id,
 			'slug'            => $post->post_name,
 			'title'           => $post->post_title,
 			'description'     => $post->post_content,
-			'recurrence'      => [
+			'recurrence'      => array(
 				'start_time' => $meta['start_time'],
 				'end_time'   => $meta['end_time'],
 				'timezone'   => $meta['timezone'],
-			],
-			'venue'           => [
+			),
+			'venue'           => array(
 				'venue'   => $meta['venue_name'],
 				'address' => $meta['venue_address'],
 				'city'    => $meta['venue_city'],
 				'state'   => $meta['venue_state'],
 				'zip'     => $meta['venue_zip'],
-			],
-			'organizer'       => [
+			),
+			'organizer'       => array(
 				'organizer' => $meta['organizer_name'],
 				'phone'     => $meta['organizer_phone'],
 				'email'     => $meta['organizer_email'],
 				'website'   => $meta['organizer_website'],
-			],
+			),
 			'cost'            => $meta['cost'],
 			'currency_symbol' => $meta['currency_symbol'],
-			'featured'        => $meta['featured'] === 'yes',
+			'featured'        => 'yes' === $meta['featured'],
 			'tags'            => array_filter( array_map( 'trim', explode( ',', $meta['tags'] ) ) ),
 			'website_url'     => $meta['website_url'],
 			'facebook_url'    => $meta['facebook_url'],
-			'meta'            => [
+			'meta'            => array(
 				'_shelter_program'              => $post->post_name,
 				'_shelter_capacity'             => $meta['capacity'],
 				'_shelter_contact_email'        => $meta['contact_email'],
 				'_shelter_requires_appointment' => $meta['requires_appointment'],
 				'_shelter_age_restriction'      => $meta['age_restriction'],
 				'_shelter_variable_pricing'     => $meta['variable_pricing'],
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -134,34 +137,36 @@ final class Event_Syncer {
 	 * @return int Number of events updated.
 	 */
 	public static function sync_events( int $program_post_id, array $program, bool $include_past = false ): int {
-		$meta_query = [
-			[
+		$meta_query = array(
+			array(
 				'key'   => '_shelter_program_post_id',
 				'value' => $program_post_id,
 				'type'  => 'NUMERIC',
-			],
-		];
+			),
+		);
 
 		// If not including past events, only get events starting from today.
 		if ( ! $include_past ) {
-			$meta_query[] = [
+			$meta_query[] = array(
 				'key'     => '_EventStartDate',
 				'value'   => current_time( 'Y-m-d 00:00:00' ),
 				'compare' => '>=',
 				'type'    => 'DATETIME',
-			];
+			);
 		}
 
-		$events = get_posts( [
-			'post_type'   => 'tribe_events',
-			'post_status' => 'any',
-			'numberposts' => -1,
-			'fields'      => 'ids',
-			'meta_query'  => [
-				'relation' => 'AND',
-				...$meta_query,
-			],
-		] );
+		$events = get_posts(
+			array(
+				'post_type'   => 'tribe_events',
+				'post_status' => 'any',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- events are only linked to programs via meta; runs once per program save.
+					'relation' => 'AND',
+					...$meta_query,
+				),
+			)
+		);
 
 		if ( empty( $events ) ) {
 			return 0;
@@ -200,7 +205,7 @@ final class Event_Syncer {
 			return false;
 		}
 
-		$event_date = substr( $existing_start, 0, 10 ); // Y-m-d
+		$event_date = substr( $existing_start, 0, 10 ); // Y-m-d.
 		$new_start  = $event_date . ' ' . $rec['start_time'] . ':00';
 		$new_end    = $event_date . ' ' . $rec['end_time'] . ':00';
 
@@ -213,15 +218,17 @@ final class Event_Syncer {
 		}
 
 		// Update the WP post itself (title, description).
-		wp_update_post( [
-			'ID'           => $event_id,
-			'post_title'   => $new_title,
-			'post_content' => $program['description'] ?? '',
-		] );
+		wp_update_post(
+			array(
+				'ID'           => $event_id,
+				'post_title'   => $new_title,
+				'post_content' => $program['description'] ?? '',
+			)
+		);
 
-		// Update TEC event meta via direct meta writes.
-		// (Using the ORM's save() for existing events requires the full
-		// event repository which is heavier than needed here.)
+		// Update TEC event meta via direct meta writes. Using the ORM's save()
+		// for existing events requires the full event repository, which is
+		// heavier than needed here.
 		update_post_meta( $event_id, '_EventStartDate', $new_start );
 		update_post_meta( $event_id, '_EventEndDate', $new_end );
 		update_post_meta( $event_id, '_EventStartDateUTC', get_gmt_from_date( $new_start ) );
@@ -252,13 +259,13 @@ final class Event_Syncer {
 		}
 
 		// Resolve and update venue.
-		$venue_id = Event_Generator::resolve_venue_public( $program['venue'] ?? [] );
+		$venue_id = Event_Generator::resolve_venue_public( $program['venue'] ?? array() );
 		if ( $venue_id ) {
 			update_post_meta( $event_id, '_EventVenueID', $venue_id );
 		}
 
 		// Resolve and update organizer.
-		$organizer_id = Event_Generator::resolve_organizer_public( $program['organizer'] ?? [] );
+		$organizer_id = Event_Generator::resolve_organizer_public( $program['organizer'] ?? array() );
 		if ( $organizer_id ) {
 			update_post_meta( $event_id, '_EventOrganizerID', $organizer_id );
 		}
@@ -276,7 +283,7 @@ final class Event_Syncer {
 		}
 
 		// Taxonomy.
-		$terms = wp_get_object_terms( $program['post_id'], 'shelter_program_cat', [ 'fields' => 'slugs' ] );
+		$terms = wp_get_object_terms( $program['post_id'], 'shelter_program_cat', array( 'fields' => 'slugs' ) );
 		if ( ! is_wp_error( $terms ) && ! empty( $terms ) && taxonomy_exists( 'shelter_program_cat' ) ) {
 			wp_set_object_terms( $event_id, $terms[0], 'shelter_program_cat' );
 		}

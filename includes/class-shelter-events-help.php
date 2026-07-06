@@ -11,11 +11,17 @@
 
 declare( strict_types=1 );
 
+/**
+ * Renders the plugin's README.md as a Help page under the Events menu.
+ */
 class Shelter_Events_Help {
 
+	/**
+	 * Hook the menu page and asset enqueue.
+	 */
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'admin_menu', array( $this, 'add_menu_page' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -28,12 +34,14 @@ class Shelter_Events_Help {
 			__( 'Staff Guide & Help', 'shelter-events-wrapper' ),
 			'edit_posts',
 			'shelter-events-help',
-			[ $this, 'render_page' ]
+			array( $this, 'render_page' )
 		);
 	}
 
 	/**
 	 * Enqueue admin styles for the help page.
+	 *
+	 * @param string $hook Current admin page hook suffix.
 	 */
 	public function enqueue_assets( string $hook ): void {
 		if ( ! str_contains( $hook, 'shelter-events-help' ) ) {
@@ -43,7 +51,7 @@ class Shelter_Events_Help {
 		wp_enqueue_style(
 			'shelter-events-help',
 			SHELTER_EVENTS_URL . 'assets/css/help.css',
-			[],
+			array(),
 			SHELTER_EVENTS_VERSION
 		);
 	}
@@ -95,15 +103,15 @@ class Shelter_Events_Help {
 	 */
 	private static function parse_markdown( string $markdown ): string {
 		// Normalize line endings.
-		$markdown = str_replace( [ "\r\n", "\r" ], "\n", $markdown );
+		$markdown = str_replace( array( "\r\n", "\r" ), "\n", $markdown );
 
 		// Extract fenced code blocks first to protect their content.
-		$code_blocks = [];
+		$code_blocks = array();
 		$markdown    = preg_replace_callback(
 			'/```(\w*)\n(.*?)```/s',
 			function ( $matches ) use ( &$code_blocks ) {
-				$key                = '%%CODEBLOCK_' . count( $code_blocks ) . '%%';
-				$lang               = $matches[1] ? ' class="language-' . esc_attr( $matches[1] ) . '"' : '';
+				$key                 = '%%CODEBLOCK_' . count( $code_blocks ) . '%%';
+				$lang                = $matches[1] ? ' class="language-' . esc_attr( $matches[1] ) . '"' : '';
 				$code_blocks[ $key ] = '<pre><code' . $lang . '>' . esc_html( $matches[2] ) . '</code></pre>';
 				return $key;
 			},
@@ -111,16 +119,16 @@ class Shelter_Events_Help {
 		);
 
 		// Split into lines for block-level processing.
-		$lines  = explode( "\n", $markdown );
-		$html   = '';
-		$in_list = false;
-		$in_table = false;
+		$lines             = explode( "\n", $markdown );
+		$html              = '';
+		$in_list           = false;
+		$in_table          = false;
 		$table_header_done = false;
-		$paragraph = '';
+		$paragraph         = '';
 
 		$flush_paragraph = function () use ( &$paragraph, &$html ) {
 			if ( trim( $paragraph ) !== '' ) {
-				$html .= '<p>' . self::inline_markup( trim( $paragraph ) ) . '</p>' . "\n";
+				$html     .= '<p>' . self::inline_markup( trim( $paragraph ) ) . '</p>' . "\n";
 				$paragraph = '';
 			}
 		};
@@ -131,8 +139,12 @@ class Shelter_Events_Help {
 			// Code block placeholder — output directly.
 			if ( str_starts_with( $trimmed, '%%CODEBLOCK_' ) && str_ends_with( $trimmed, '%%' ) ) {
 				$flush_paragraph();
-				if ( $in_list ) { $html .= "</ul>\n"; $in_list = false; }
-				if ( $in_table ) { $html .= "</tbody></table>\n"; $in_table = false; }
+				if ( $in_list ) {
+					$html   .= "</ul>\n";
+					$in_list = false; }
+				if ( $in_table ) {
+					$html    .= "</tbody></table>\n";
+					$in_table = false; }
 				// Placeholder is replaced later.
 				$html .= $trimmed . "\n";
 				continue;
@@ -141,8 +153,12 @@ class Shelter_Events_Help {
 			// Horizontal rule.
 			if ( preg_match( '/^(-{3,}|\*{3,})$/', $trimmed ) ) {
 				$flush_paragraph();
-				if ( $in_list ) { $html .= "</ul>\n"; $in_list = false; }
-				if ( $in_table ) { $html .= "</tbody></table>\n"; $in_table = false; }
+				if ( $in_list ) {
+					$html   .= "</ul>\n";
+					$in_list = false; }
+				if ( $in_table ) {
+					$html    .= "</tbody></table>\n";
+					$in_table = false; }
 				$html .= "<hr>\n";
 				continue;
 			}
@@ -150,8 +166,12 @@ class Shelter_Events_Help {
 			// Headings.
 			if ( preg_match( '/^(#{1,6})\s+(.+)$/', $trimmed, $m ) ) {
 				$flush_paragraph();
-				if ( $in_list ) { $html .= "</ul>\n"; $in_list = false; }
-				if ( $in_table ) { $html .= "</tbody></table>\n"; $in_table = false; }
+				if ( $in_list ) {
+					$html   .= "</ul>\n";
+					$in_list = false; }
+				if ( $in_table ) {
+					$html    .= "</tbody></table>\n";
+					$in_table = false; }
 				$level = strlen( $m[1] );
 				$text  = self::inline_markup( $m[2] );
 				$id    = sanitize_title( wp_strip_all_tags( $m[2] ) );
@@ -162,7 +182,9 @@ class Shelter_Events_Help {
 			// Table rows.
 			if ( str_starts_with( $trimmed, '|' ) && str_ends_with( $trimmed, '|' ) ) {
 				$flush_paragraph();
-				if ( $in_list ) { $html .= "</ul>\n"; $in_list = false; }
+				if ( $in_list ) {
+					$html   .= "</ul>\n";
+					$in_list = false; }
 
 				// Separator row (|---|---|) — skip, just mark header done.
 				if ( preg_match( '/^\|[\s\-:|]+\|$/', $trimmed ) ) {
@@ -177,8 +199,8 @@ class Shelter_Events_Help {
 					foreach ( $cells as $cell ) {
 						$html .= '<th>' . self::inline_markup( $cell ) . '</th>';
 					}
-					$html .= "</tr></thead>\n<tbody>\n";
-					$in_table = true;
+					$html             .= "</tr></thead>\n<tbody>\n";
+					$in_table          = true;
 					$table_header_done = false;
 					continue;
 				}
@@ -193,8 +215,8 @@ class Shelter_Events_Help {
 
 			// Close table if we hit a non-table line.
 			if ( $in_table && ! str_starts_with( $trimmed, '|' ) ) {
-				$html .= "</tbody></table>\n";
-				$in_table = false;
+				$html             .= "</tbody></table>\n";
+				$in_table          = false;
 				$table_header_done = false;
 			}
 
@@ -202,7 +224,7 @@ class Shelter_Events_Help {
 			if ( preg_match( '/^[\-\*]\s+(.+)$/', $trimmed, $m ) ) {
 				$flush_paragraph();
 				if ( ! $in_list ) {
-					$html .= "<ul>\n";
+					$html   .= "<ul>\n";
 					$in_list = true;
 				}
 				$html .= '<li>' . self::inline_markup( $m[1] ) . "</li>\n";
@@ -213,7 +235,7 @@ class Shelter_Events_Help {
 			if ( preg_match( '/^\d+\.\s+(.+)$/', $trimmed, $m ) ) {
 				$flush_paragraph();
 				if ( ! $in_list ) {
-					$html .= "<ol>\n";
+					$html   .= "<ol>\n";
 					$in_list = true;
 				}
 				$html .= '<li>' . self::inline_markup( $m[1] ) . "</li>\n";
@@ -223,24 +245,26 @@ class Shelter_Events_Help {
 			// Close list if we hit a non-list line.
 			if ( $in_list && ! preg_match( '/^[\-\*]\s/', $trimmed ) && ! preg_match( '/^\d+\./', $trimmed ) ) {
 				// Check if it's ol or ul by looking back.
-				$html .= str_contains( $html, '<ol>' ) && ! str_contains( $html, '</ol>' ) ? "</ol>\n" : "</ul>\n";
+				$html   .= str_contains( $html, '<ol>' ) && ! str_contains( $html, '</ol>' ) ? "</ol>\n" : "</ul>\n";
 				$in_list = false;
 			}
 
 			// Empty line — flush paragraph.
-			if ( $trimmed === '' ) {
+			if ( '' === $trimmed ) {
 				$flush_paragraph();
 				continue;
 			}
 
 			// Regular text — accumulate into paragraph.
-			$paragraph .= ( $paragraph !== '' ? ' ' : '' ) . $trimmed;
+			$paragraph .= ( '' !== $paragraph ? ' ' : '' ) . $trimmed;
 		}
 
 		// Flush remaining state.
 		$flush_paragraph();
-		if ( $in_list ) { $html .= "</ul>\n"; }
-		if ( $in_table ) { $html .= "</tbody></table>\n"; }
+		if ( $in_list ) {
+			$html .= "</ul>\n"; }
+		if ( $in_table ) {
+			$html .= "</tbody></table>\n"; }
 
 		// Restore code blocks.
 		foreach ( $code_blocks as $key => $replacement ) {

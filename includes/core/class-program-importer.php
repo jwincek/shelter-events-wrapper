@@ -13,9 +13,16 @@ declare( strict_types=1 );
 
 namespace Shelter_Events\Core;
 
+/**
+ * One-time importer that converts config/events.json programs into CPT posts.
+ */
 final class Program_Importer {
 
-	/** @var string Option key to track whether import has run. */
+	/**
+	 * Option key to track whether import has run.
+	 *
+	 * @var string
+	 */
 	private const IMPORTED_FLAG = 'shelter_events_programs_imported';
 
 	/**
@@ -27,9 +34,9 @@ final class Program_Importer {
 		}
 
 		$config   = Config::get( 'events' );
-		$programs = $config['programs'] ?? [];
-		$venues   = $config['venues'] ?? [];
-		$orgs     = $config['organizers'] ?? [];
+		$programs = $config['programs'] ?? array();
+		$venues   = $config['venues'] ?? array();
+		$orgs     = $config['organizers'] ?? array();
 
 		if ( empty( $programs ) ) {
 			update_option( self::IMPORTED_FLAG, true );
@@ -38,50 +45,54 @@ final class Program_Importer {
 
 		foreach ( $programs as $slug => $program ) {
 			// Check if a post with this slug already exists.
-			$existing = get_posts( [
-				'post_type'   => Program_CPT::POST_TYPE,
-				'name'        => $slug,
-				'numberposts' => 1,
-				'fields'      => 'ids',
-			] );
+			$existing = get_posts(
+				array(
+					'post_type'   => Program_CPT::POST_TYPE,
+					'name'        => $slug,
+					'numberposts' => 1,
+					'fields'      => 'ids',
+				)
+			);
 
 			if ( ! empty( $existing ) ) {
 				continue;
 			}
 
 			// Create the CPT post.
-			$post_id = wp_insert_post( [
-				'post_type'    => Program_CPT::POST_TYPE,
-				'post_title'   => $program['title'],
-				'post_content' => $program['description'] ?? '',
-				'post_status'  => 'publish',
-				'post_name'    => $slug,
-			] );
+			$post_id = wp_insert_post(
+				array(
+					'post_type'    => Program_CPT::POST_TYPE,
+					'post_title'   => $program['title'],
+					'post_content' => $program['description'] ?? '',
+					'post_status'  => 'publish',
+					'post_name'    => $slug,
+				)
+			);
 
 			if ( is_wp_error( $post_id ) || ! $post_id ) {
 				continue;
 			}
 
 			// Map JSON structure to CPT meta fields.
-			$rec = $program['recurrence'] ?? [];
-			$meta_map = [
-				'recurrence_days'      => $rec['days'] ?? [],
-				'start_time'           => $rec['start_time'] ?? '18:00',
-				'end_time'             => $rec['end_time'] ?? '21:00',
-				'timezone'             => $rec['timezone'] ?? 'America/New_York',
-				'cost'                 => $program['cost'] ?? '0',
-				'currency_symbol'      => $program['currency_symbol'] ?? '$',
-				'featured'             => ! empty( $program['featured'] ) ? 'yes' : 'no',
-				'tags'                 => implode( ', ', $program['tags'] ?? [] ),
-				'active'               => 'yes',
-				'website_url'          => $program['website_url'] ?? '',
-				'facebook_url'         => $program['facebook_url'] ?? '',
-			];
+			$rec      = $program['recurrence'] ?? array();
+			$meta_map = array(
+				'recurrence_days' => $rec['days'] ?? array(),
+				'start_time'      => $rec['start_time'] ?? '18:00',
+				'end_time'        => $rec['end_time'] ?? '21:00',
+				'timezone'        => $rec['timezone'] ?? 'America/New_York',
+				'cost'            => $program['cost'] ?? '0',
+				'currency_symbol' => $program['currency_symbol'] ?? '$',
+				'featured'        => ! empty( $program['featured'] ) ? 'yes' : 'no',
+				'tags'            => implode( ', ', $program['tags'] ?? array() ),
+				'active'          => 'yes',
+				'website_url'     => $program['website_url'] ?? '',
+				'facebook_url'    => $program['facebook_url'] ?? '',
+			);
 
 			// Resolve venue from JSON venue slug.
 			$venue_slug = $program['venue_slug'] ?? '';
 			if ( $venue_slug && isset( $venues[ $venue_slug ] ) ) {
-				$v = $venues[ $venue_slug ];
+				$v                         = $venues[ $venue_slug ];
 				$meta_map['venue_name']    = $v['venue'] ?? '';
 				$meta_map['venue_address'] = $v['address'] ?? '';
 				$meta_map['venue_city']    = $v['city'] ?? '';
@@ -92,7 +103,7 @@ final class Program_Importer {
 			// Resolve organizer from JSON organizer slug.
 			$org_slug = $program['organizer_slug'] ?? '';
 			if ( $org_slug && isset( $orgs[ $org_slug ] ) ) {
-				$o = $orgs[ $org_slug ];
+				$o                             = $orgs[ $org_slug ];
 				$meta_map['organizer_name']    = $o['organizer'] ?? '';
 				$meta_map['organizer_phone']   = $o['phone'] ?? '';
 				$meta_map['organizer_email']   = $o['email'] ?? '';
@@ -100,7 +111,7 @@ final class Program_Importer {
 			}
 
 			// Pull extra meta from the program definition.
-			$program_meta = $program['meta'] ?? [];
+			$program_meta                     = $program['meta'] ?? array();
 			$meta_map['capacity']             = $program_meta['_shelter_capacity'] ?? '';
 			$meta_map['contact_email']        = $program_meta['_shelter_contact_email'] ?? '';
 			$meta_map['requires_appointment'] = ( $program_meta['_shelter_requires_appointment'] ?? '' ) === 'yes' ? 'yes' : 'no';

@@ -18,13 +18,16 @@ use DatePeriod;
 use DateTime;
 use DateTimeZone;
 
+/**
+ * Creates individual TEC event instances from active program definitions.
+ */
 final class Event_Generator {
 
 	/**
 	 * Run the generation for all active programs (WP-Cron entry point).
 	 */
 	public static function run(): void {
-		$gen_config = Config::get_item( 'events', 'generation', [] );
+		$gen_config = Config::get_item( 'events', 'generation', array() );
 		$weeks      = (int) ( $gen_config['lookahead_weeks'] ?? 8 );
 		$programs   = Program_CPT::get_active_programs();
 
@@ -42,7 +45,7 @@ final class Event_Generator {
 	 * @return array List of created (or planned) event data.
 	 */
 	public static function generate_for_program( array $program, int $weeks = 8, bool $dry_run = false ): array {
-		$gen_config = Config::get_item( 'events', 'generation', [] );
+		$gen_config = Config::get_item( 'events', 'generation', array() );
 		$hash_key   = $gen_config['duplicate_check_meta_key'] ?? '_shelter_generated_hash';
 		$recurrence = $program['recurrence'];
 		$tz         = new DateTimeZone( $recurrence['timezone'] ?? wp_timezone_string() );
@@ -53,11 +56,11 @@ final class Event_Generator {
 
 		$target_days = array_map( 'strtolower', $recurrence['days'] );
 		$slug        = $program['slug'];
-		$results     = [];
+		$results     = array();
 
 		// Merge global + per-program blackout dates into a single lookup set.
 		$global_blackouts  = \Shelter_Events_Admin::get_global_blackout_dates();
-		$program_blackouts = $program['blackout_dates'] ?? [];
+		$program_blackouts = $program['blackout_dates'] ?? array();
 		$blackout_set      = array_flip( array_merge( $global_blackouts, $program_blackouts ) );
 
 		foreach ( $period as $date ) {
@@ -81,22 +84,22 @@ final class Event_Generator {
 			}
 
 			if ( $dry_run ) {
-				$results[] = [
+				$results[] = array(
 					'date'  => $event_date,
 					'hash'  => $hash,
 					'title' => $program['title'] . ' — ' . $date->format( 'l, F j, Y' ),
-				];
+				);
 				continue;
 			}
 
 			$event_id = self::create_event( $program, $date, $hash );
 
 			if ( $event_id ) {
-				$results[] = [
+				$results[] = array(
 					'event_id' => $event_id,
 					'date'     => $event_date,
 					'hash'     => $hash,
-				];
+				);
 			}
 		}
 
@@ -105,19 +108,24 @@ final class Event_Generator {
 
 	/**
 	 * Create a single TEC event via the ORM.
+	 *
+	 * @param array    $program Program definition array.
+	 * @param DateTime $date    Date the event occurs on.
+	 * @param string   $hash    Dedup hash to store on the created event.
+	 * @return int|false New event post ID, or false on failure.
 	 */
 	private static function create_event( array $program, DateTime $date, string $hash ): int|false {
-		$gen_config = Config::get_item( 'events', 'generation', [] );
+		$gen_config = Config::get_item( 'events', 'generation', array() );
 		$hash_key   = $gen_config['duplicate_check_meta_key'] ?? '_shelter_generated_hash';
 		$rec        = $program['recurrence'];
 
 		$start_date = $date->format( 'Y-m-d' ) . ' ' . $rec['start_time'] . ':00';
 		$end_date   = $date->format( 'Y-m-d' ) . ' ' . $rec['end_time'] . ':00';
 
-		$venue_id     = self::resolve_venue( $program['venue'] ?? [] );
-		$organizer_id = self::resolve_organizer( $program['organizer'] ?? [] );
+		$venue_id     = self::resolve_venue( $program['venue'] ?? array() );
+		$organizer_id = self::resolve_organizer( $program['organizer'] ?? array() );
 
-		$args = [
+		$args = array(
 			'title'           => $program['title'] . ' — ' . $date->format( 'l, F j, Y' ),
 			'status'          => 'publish',
 			'start_date'      => $start_date,
@@ -127,8 +135,8 @@ final class Event_Generator {
 			'cost'            => $program['cost'] ?? '',
 			'currency_symbol' => $program['currency_symbol'] ?? '$',
 			'featured'        => $program['featured'] ?? false,
-			'tag'             => $program['tags'] ?? [],
-		];
+			'tag'             => $program['tags'] ?? array(),
+		);
 
 		// Map the program's website URL to TEC's native Event Website field (_EventURL).
 		if ( ! empty( $program['website_url'] ) ) {
@@ -166,7 +174,7 @@ final class Event_Generator {
 		// Additional custom meta.
 		if ( ! empty( $program['meta'] ) ) {
 			foreach ( $program['meta'] as $key => $value ) {
-				if ( $value !== '' ) {
+				if ( '' !== $value ) {
 					update_post_meta( $event->ID, $key, $value );
 				}
 			}
@@ -189,10 +197,22 @@ final class Event_Generator {
 
 	// ── Venue / Organizer resolution ──────────────────────────────────────────
 
+	/**
+	 * Find or create a TEC Venue for a program.
+	 *
+	 * @param array $venue_data Venue fields from the program config.
+	 * @return int|null Venue post ID or null.
+	 */
 	private static function resolve_venue( array $venue_data ): ?int {
 		return self::resolve_venue_public( $venue_data );
 	}
 
+	/**
+	 * Find or create a TEC Organizer for a program.
+	 *
+	 * @param array $org_data Organizer fields from the program config.
+	 * @return int|null Organizer post ID or null.
+	 */
 	private static function resolve_organizer( array $org_data ): ?int {
 		return self::resolve_organizer_public( $org_data );
 	}
@@ -214,6 +234,7 @@ final class Event_Generator {
 
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- get_posts() cannot match by exact title; infrequent generation-time lookup.
 		$existing_id = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
@@ -228,13 +249,18 @@ final class Event_Generator {
 		if ( $existing_id ) {
 			// Ensure the existing venue is published.
 			if ( get_post_status( $existing_id ) === 'draft' ) {
-				wp_update_post( [ 'ID' => (int) $existing_id, 'post_status' => 'publish' ] );
+				wp_update_post(
+					array(
+						'ID'          => (int) $existing_id,
+						'post_status' => 'publish',
+					)
+				);
 			}
 			return (int) $existing_id;
 		}
 
 		$venue_data['status'] = 'publish';
-		$venue = tribe_venues()->set_args( $venue_data )->create();
+		$venue                = tribe_venues()->set_args( $venue_data )->create();
 		return $venue instanceof \WP_Post ? $venue->ID : null;
 	}
 
@@ -251,6 +277,7 @@ final class Event_Generator {
 
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- get_posts() cannot match by exact title; infrequent generation-time lookup.
 		$existing_id = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
@@ -265,13 +292,18 @@ final class Event_Generator {
 		if ( $existing_id ) {
 			// Ensure the existing organizer is published.
 			if ( get_post_status( $existing_id ) === 'draft' ) {
-				wp_update_post( [ 'ID' => (int) $existing_id, 'post_status' => 'publish' ] );
+				wp_update_post(
+					array(
+						'ID'          => (int) $existing_id,
+						'post_status' => 'publish',
+					)
+				);
 			}
 			return (int) $existing_id;
 		}
 
 		$org_data['status'] = 'publish';
-		$organizer = tribe_organizers()->set_args( $org_data )->create();
+		$organizer          = tribe_organizers()->set_args( $org_data )->create();
 		return $organizer instanceof \WP_Post ? $organizer->ID : null;
 	}
 
@@ -301,6 +333,13 @@ final class Event_Generator {
 		return self::meta_to_datetime( $event_id, '_EventEndDate' );
 	}
 
+	/**
+	 * Convert a TEC datetime meta value into a DateTime, or null when invalid.
+	 *
+	 * @param int    $event_id Event post ID.
+	 * @param string $meta_key Meta key holding the datetime string.
+	 * @return DateTime|null
+	 */
 	private static function meta_to_datetime( int $event_id, string $meta_key ): ?DateTime {
 		$value = get_post_meta( $event_id, $meta_key, true );
 
@@ -315,13 +354,28 @@ final class Event_Generator {
 		}
 	}
 
+	/**
+	 * Build the dedup hash for a program occurrence on a given date.
+	 *
+	 * @param string $slug Program slug.
+	 * @param string $date Event date in Y-m-d format.
+	 * @return string SHA-256 hash.
+	 */
 	public static function make_hash( string $slug, string $date ): string {
 		return hash( 'sha256', "shelter-event:{$slug}:{$date}" );
 	}
 
+	/**
+	 * Check whether an event with the given dedup hash already exists.
+	 *
+	 * @param string $meta_key Meta key the hash is stored under.
+	 * @param string $hash     Dedup hash to look for.
+	 * @return bool True when a matching event exists.
+	 */
 	private static function event_exists( string $meta_key, string $hash ): bool {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- hot dedup path run per candidate date; a COUNT on postmeta is cheaper than a WP_Query.
 		$exists = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s",

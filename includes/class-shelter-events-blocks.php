@@ -10,42 +10,51 @@
 
 declare( strict_types=1 );
 
+/**
+ * Registers the plugin's blocks and their server-side render callbacks.
+ */
 class Shelter_Events_Blocks {
 
+	/**
+	 * Hook block registration into init.
+	 */
 	public function __construct() {
-		add_action( 'init', [ $this, 'register_blocks' ] );
+		add_action( 'init', array( $this, 'register_blocks' ) );
 	}
 
 	/**
 	 * Register all plugin blocks.
 	 */
 	public function register_blocks(): void {
-		register_block_type( SHELTER_EVENTS_DIR . 'blocks/shelter-event-list', [
-			'render_callback' => [ $this, 'render_event_list' ],
-			'attributes'      => [
-				'program' => [
-					'type'    => 'string',
-					'default' => '',
-				],
-				'count' => [
-					'type'    => 'number',
-					'default' => 5,
-				],
-				'showCost' => [
-					'type'    => 'boolean',
-					'default' => true,
-				],
-				'showVenue' => [
-					'type'    => 'boolean',
-					'default' => true,
-				],
-				'layout' => [
-					'type'    => 'string',
-					'default' => 'list',
-					'enum'    => [ 'list', 'card', 'compact' ],
-				],
-			],
-		] );
+		register_block_type(
+			SHELTER_EVENTS_DIR . 'blocks/shelter-event-list',
+			array(
+				'render_callback' => array( $this, 'render_event_list' ),
+				'attributes'      => array(
+					'program'   => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+					'count'     => array(
+						'type'    => 'number',
+						'default' => 5,
+					),
+					'showCost'  => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'showVenue' => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'layout'    => array(
+						'type'    => 'string',
+						'default' => 'list',
+						'enum'    => array( 'list', 'card', 'compact' ),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -61,9 +70,9 @@ class Shelter_Events_Blocks {
 				'</p>';
 		}
 
-		$program  = $attributes['program'] ?? '';
-		$count    = (int) ( $attributes['count'] ?? 5 );
-		$layout   = $attributes['layout'] ?? 'list';
+		$program = $attributes['program'] ?? '';
+		$count   = (int) ( $attributes['count'] ?? 5 );
+		$layout  = $attributes['layout'] ?? 'list';
 
 		$query = tribe_events()
 			->where( 'starts_after', 'now' )
@@ -78,9 +87,12 @@ class Shelter_Events_Blocks {
 
 		// Hide cancelled events that have been replaced — the replacement
 		// event occupies the same calendar slot and will appear on its own.
-		$events = array_filter( $events, function ( $event ) {
-			return ! get_post_meta( $event->ID, '_shelter_replaced_by', true );
-		} );
+		$events = array_filter(
+			$events,
+			function ( $event ) {
+				return ! get_post_meta( $event->ID, '_shelter_replaced_by', true );
+			}
+		);
 
 		if ( empty( $events ) ) {
 			return '<p class="shelter-events-empty">' .
@@ -93,7 +105,8 @@ class Shelter_Events_Blocks {
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
-			<?php foreach ( $events as $event ) :
+			<?php
+			foreach ( $events as $event ) :
 				$event_id = $event->ID;
 				$start_dt = \Shelter_Events\Core\Event_Generator::get_event_start( $event_id );
 				$end_dt   = \Shelter_Events\Core\Event_Generator::get_event_end( $event_id );
@@ -105,7 +118,7 @@ class Shelter_Events_Blocks {
 
 				$cancelled    = (bool) get_post_meta( $event_id, '_shelter_cancelled', true );
 				$program_slug = get_post_meta( $event_id, '_shelter_program_slug', true );
-			?>
+				?>
 				<article class="shelter-event-item<?php echo $cancelled ? ' shelter-event-item--cancelled' : ''; ?>"
 					data-program="<?php echo esc_attr( $program_slug ); ?>">
 
@@ -138,12 +151,13 @@ class Shelter_Events_Blocks {
 								</span>
 							<?php endif; ?>
 
-							<?php if ( ! empty( $attributes['showCost'] ) ) :
-								$variable = get_post_meta( $event_id, '_shelter_variable_pricing', true );
-								$cost_display = ( $variable === 'yes' )
+							<?php
+							if ( ! empty( $attributes['showCost'] ) ) :
+								$variable     = get_post_meta( $event_id, '_shelter_variable_pricing', true );
+								$cost_display = ( 'yes' === $variable )
 									? __( 'Varies', 'shelter-events-wrapper' )
 									: tribe_get_cost( $event_id, true );
-							?>
+								?>
 								<span class="shelter-event-item__cost">
 									<?php echo esc_html( $cost_display ); ?>
 								</span>

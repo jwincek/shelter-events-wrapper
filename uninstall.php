@@ -39,12 +39,12 @@ function shelter_events_uninstall_site(): void {
 
 	// Program CPT posts (post meta is removed by wp_delete_post).
 	$program_ids = get_posts(
-		[
+		array(
 			'post_type'   => 'shelter_program',
 			'post_status' => 'any',
 			'numberposts' => -1,
 			'fields'      => 'ids',
-		]
+		)
 	);
 
 	foreach ( $program_ids as $program_id ) {
@@ -73,14 +73,14 @@ function shelter_events_uninstall_site(): void {
 
 	// Program-category terms. The taxonomy isn't registered during uninstall
 	// (the plugin doesn't load), so stub-register it for the term APIs.
-	register_taxonomy( 'shelter_program_cat', [] );
+	register_taxonomy( 'shelter_program_cat', array() );
 
 	$terms = get_terms(
-		[
+		array(
 			'taxonomy'   => 'shelter_program_cat',
 			'hide_empty' => false,
 			'fields'     => 'ids',
-		]
+		)
 	);
 
 	if ( ! is_wp_error( $terms ) ) {
@@ -96,7 +96,7 @@ function shelter_events_uninstall_site(): void {
 }
 
 if ( is_multisite() ) {
-	$shelter_events_site_ids = get_sites( [ 'fields' => 'ids' ] );
+	$shelter_events_site_ids = get_sites( array( 'fields' => 'ids' ) );
 
 	foreach ( $shelter_events_site_ids as $shelter_events_site_id ) {
 		switch_to_blog( (int) $shelter_events_site_id );

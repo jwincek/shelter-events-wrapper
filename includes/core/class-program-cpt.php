@@ -17,158 +17,173 @@ declare( strict_types=1 );
 
 namespace Shelter_Events\Core;
 
+/**
+ * Registers the shelter_program CPT, its metabox, save handling, and admin columns.
+ */
 final class Program_CPT {
 
-	/** @var string Post type slug. */
+	/**
+	 * Post type slug.
+	 *
+	 * @var string
+	 */
 	public const POST_TYPE = 'shelter_program';
 
-	/** @var string Meta key prefix. */
+	/**
+	 * Meta key prefix.
+	 *
+	 * @var string
+	 */
 	private const META_PREFIX = '_shelter_prog_';
 
-	/** @var array<string, array> Meta field definitions with defaults. */
-	private const FIELDS = [
-		'recurrence_days' => [
+	/**
+	 * Meta field definitions with defaults.
+	 *
+	 * @var array<string, array>
+	 */
+	private const FIELDS = array(
+		'recurrence_days'      => array(
 			'type'    => 'array',
-			'default' => [],
+			'default' => array(),
 			'label'   => 'Recurrence days',
-		],
-		'start_time' => [
+		),
+		'start_time'           => array(
 			'type'    => 'string',
 			'default' => '18:00',
 			'label'   => 'Start time',
-		],
-		'end_time' => [
+		),
+		'end_time'             => array(
 			'type'    => 'string',
 			'default' => '21:00',
 			'label'   => 'End time',
-		],
-		'timezone' => [
+		),
+		'timezone'             => array(
 			'type'    => 'string',
 			'default' => 'America/New_York',
 			'label'   => 'Timezone',
-		],
-		'venue_name' => [
+		),
+		'venue_name'           => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Venue name',
-		],
-		'venue_address' => [
+		),
+		'venue_address'        => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Venue address',
-		],
-		'venue_city' => [
+		),
+		'venue_city'           => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Venue city',
-		],
-		'venue_state' => [
+		),
+		'venue_state'          => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Venue state',
-		],
-		'venue_zip' => [
+		),
+		'venue_zip'            => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Venue ZIP',
-		],
-		'organizer_name' => [
+		),
+		'organizer_name'       => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Organizer name',
-		],
-		'organizer_phone' => [
+		),
+		'organizer_phone'      => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Organizer phone',
-		],
-		'organizer_email' => [
+		),
+		'organizer_email'      => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Organizer email',
-		],
-		'organizer_website' => [
+		),
+		'organizer_website'    => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Organizer website',
-		],
-		'cost' => [
+		),
+		'cost'                 => array(
 			'type'    => 'string',
 			'default' => '0',
 			'label'   => 'Cost',
-		],
-		'variable_pricing' => [
+		),
+		'variable_pricing'     => array(
 			'type'    => 'string',
 			'default' => 'no',
 			'label'   => 'Variable pricing',
-		],
-		'currency_symbol' => [
+		),
+		'currency_symbol'      => array(
 			'type'    => 'string',
 			'default' => '$',
 			'label'   => 'Currency symbol',
-		],
-		'capacity' => [
+		),
+		'capacity'             => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Capacity',
-		],
-		'contact_email' => [
+		),
+		'contact_email'        => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Contact email',
-		],
-		'requires_appointment' => [
+		),
+		'requires_appointment' => array(
 			'type'    => 'string',
 			'default' => 'no',
 			'label'   => 'Requires appointment',
-		],
-		'age_restriction' => [
+		),
+		'age_restriction'      => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Age restriction',
-		],
-		'website_url' => [
+		),
+		'website_url'          => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Event website URL',
-		],
-		'facebook_url' => [
+		),
+		'facebook_url'         => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Facebook page URL',
-		],
-		'tags' => [
+		),
+		'tags'                 => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Event tags (comma-separated)',
-		],
-		'featured' => [
+		),
+		'featured'             => array(
 			'type'    => 'string',
 			'default' => 'no',
 			'label'   => 'Featured event',
-		],
-		'blackout_dates' => [
+		),
+		'blackout_dates'       => array(
 			'type'    => 'string',
 			'default' => '',
 			'label'   => 'Blackout dates',
-		],
-		'active' => [
+		),
+		'active'               => array(
 			'type'    => 'string',
 			'default' => 'yes',
 			'label'   => 'Active (generates events)',
-		],
-	];
+		),
+	);
 
 	/**
 	 * Hook into WordPress.
 	 */
 	public static function init(): void {
-		add_action( 'init', [ __CLASS__, 'register_post_type' ], 10 );
-		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ] );
-		add_action( 'save_post_' . self::POST_TYPE, [ __CLASS__, 'save_meta' ], 10, 2 );
-		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', [ __CLASS__, 'admin_columns' ] );
-		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', [ __CLASS__, 'admin_column_content' ], 10, 2 );
-		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
+		add_action( 'init', array( __CLASS__, 'register_post_type' ), 10 );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
+		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'save_meta' ), 10, 2 );
+		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( __CLASS__, 'admin_columns' ) );
+		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( __CLASS__, 'admin_column_content' ), 10, 2 );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
 	}
 
 	/**
@@ -179,46 +194,51 @@ final class Program_CPT {
 			return;
 		}
 
-		register_post_type( self::POST_TYPE, [
-			'labels' => [
-				'name'               => __( 'Programs', 'shelter-events-wrapper' ),
-				'singular_name'      => __( 'Program', 'shelter-events-wrapper' ),
-				'menu_name'          => __( 'Shelter Programs', 'shelter-events-wrapper' ),
-				'add_new'            => __( 'Add New Program', 'shelter-events-wrapper' ),
-				'add_new_item'       => __( 'Add New Program', 'shelter-events-wrapper' ),
-				'edit_item'          => __( 'Edit Program', 'shelter-events-wrapper' ),
-				'new_item'           => __( 'New Program', 'shelter-events-wrapper' ),
-				'view_item'          => __( 'View Program', 'shelter-events-wrapper' ),
-				'search_items'       => __( 'Search Programs', 'shelter-events-wrapper' ),
-				'not_found'          => __( 'No programs found.', 'shelter-events-wrapper' ),
-				'not_found_in_trash' => __( 'No programs found in trash.', 'shelter-events-wrapper' ),
-				'all_items'          => __( 'All Programs', 'shelter-events-wrapper' ),
-			],
-			'public'             => false,
-			'show_ui'            => true,
-			'show_in_menu'       => 'edit.php?post_type=tribe_events',
-			'show_in_rest'       => true,
-			'supports'           => [ 'title', 'editor', 'thumbnail' ],
-			'menu_icon'          => 'dashicons-calendar-alt',
-			'capability_type'    => 'post',
-			'has_archive'        => false,
-			'rewrite'            => false,
-		] );
+		register_post_type(
+			self::POST_TYPE,
+			array(
+				'labels'          => array(
+					'name'               => __( 'Programs', 'shelter-events-wrapper' ),
+					'singular_name'      => __( 'Program', 'shelter-events-wrapper' ),
+					'menu_name'          => __( 'Shelter Programs', 'shelter-events-wrapper' ),
+					'add_new'            => __( 'Add New Program', 'shelter-events-wrapper' ),
+					'add_new_item'       => __( 'Add New Program', 'shelter-events-wrapper' ),
+					'edit_item'          => __( 'Edit Program', 'shelter-events-wrapper' ),
+					'new_item'           => __( 'New Program', 'shelter-events-wrapper' ),
+					'view_item'          => __( 'View Program', 'shelter-events-wrapper' ),
+					'search_items'       => __( 'Search Programs', 'shelter-events-wrapper' ),
+					'not_found'          => __( 'No programs found.', 'shelter-events-wrapper' ),
+					'not_found_in_trash' => __( 'No programs found in trash.', 'shelter-events-wrapper' ),
+					'all_items'          => __( 'All Programs', 'shelter-events-wrapper' ),
+				),
+				'public'          => false,
+				'show_ui'         => true,
+				'show_in_menu'    => 'edit.php?post_type=tribe_events',
+				'show_in_rest'    => true,
+				'supports'        => array( 'title', 'editor', 'thumbnail' ),
+				'menu_icon'       => 'dashicons-calendar-alt',
+				'capability_type' => 'post',
+				'has_archive'     => false,
+				'rewrite'         => false,
+			)
+		);
 	}
 
 	/**
 	 * Enqueue admin CSS for the metabox.
+	 *
+	 * @param string $hook Current admin page hook suffix.
 	 */
-	public static function enqueue_admin_assets( string $hook ): void {
+	public static function enqueue_admin_assets( string $hook ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- required by the admin_enqueue_scripts signature.
 		$screen = get_current_screen();
-		if ( ! $screen || $screen->post_type !== self::POST_TYPE ) {
+		if ( ! $screen || self::POST_TYPE !== $screen->post_type ) {
 			return;
 		}
 
 		wp_enqueue_style(
 			'shelter-events-program-metabox',
 			SHELTER_EVENTS_URL . 'assets/css/program-metabox.css',
-			[],
+			array(),
 			SHELTER_EVENTS_VERSION
 		);
 	}
@@ -232,7 +252,7 @@ final class Program_CPT {
 		add_meta_box(
 			'shelter-program-schedule',
 			__( 'Event Schedule Settings', 'shelter-events-wrapper' ),
-			[ __CLASS__, 'render_metabox' ],
+			array( __CLASS__, 'render_metabox' ),
 			self::POST_TYPE,
 			'normal',
 			'high'
@@ -241,6 +261,8 @@ final class Program_CPT {
 
 	/**
 	 * Render the metabox.
+	 *
+	 * @param \WP_Post $post The program post being edited.
 	 */
 	public static function render_metabox( \WP_Post $post ): void {
 		wp_nonce_field( 'shelter_program_save', 'shelter_program_nonce' );
@@ -251,22 +273,25 @@ final class Program_CPT {
 		$sync_count = get_transient( 'shelter_events_sync_result_' . $post->ID );
 		if ( $sync_count ) {
 			delete_transient( 'shelter_events_sync_result_' . $post->ID );
+			$sync_count = (int) $sync_count;
 			printf(
 				'<div class="notice notice-success inline" style="margin:0 0 12px;"><p>%s</p></div>',
-				sprintf(
-					/* translators: %d = number of events updated */
-					esc_html( _n(
-						'%d existing event was updated to match this program.',
-						'%d existing events were updated to match this program.',
-						$sync_count,
-						'shelter-events-wrapper'
-					) ),
-					$sync_count
+				esc_html(
+					sprintf(
+						/* translators: %d = number of events updated */
+						_n(
+							'%d existing event was updated to match this program.',
+							'%d existing events were updated to match this program.',
+							$sync_count,
+							'shelter-events-wrapper'
+						),
+						$sync_count
+					)
 				)
 			);
 		}
 
-		$days_of_week = [
+		$days_of_week = array(
 			'monday'    => __( 'Monday', 'shelter-events-wrapper' ),
 			'tuesday'   => __( 'Tuesday', 'shelter-events-wrapper' ),
 			'wednesday' => __( 'Wednesday', 'shelter-events-wrapper' ),
@@ -274,12 +299,12 @@ final class Program_CPT {
 			'friday'    => __( 'Friday', 'shelter-events-wrapper' ),
 			'saturday'  => __( 'Saturday', 'shelter-events-wrapper' ),
 			'sunday'    => __( 'Sunday', 'shelter-events-wrapper' ),
-		];
+		);
 		?>
 		<div class="shelter-metabox">
 
 			<!-- Status Banner -->
-			<div class="shelter-metabox__status <?php echo $meta['active'] === 'yes' ? 'shelter-metabox__status--active' : 'shelter-metabox__status--paused'; ?>">
+			<div class="shelter-metabox__status <?php echo 'yes' === $meta['active'] ? 'shelter-metabox__status--active' : 'shelter-metabox__status--paused'; ?>">
 				<div>
 					<label>
 						<input type="checkbox" name="shelter_prog_active" value="yes"
@@ -336,7 +361,7 @@ final class Program_CPT {
 						<?php
 						$timezones = timezone_identifiers_list();
 						foreach ( $timezones as $tz ) :
-						?>
+							?>
 							<option value="<?php echo esc_attr( $tz ); ?>"
 								<?php selected( $meta['timezone'], $tz ); ?>>
 								<?php echo esc_html( $tz ); ?>
@@ -519,8 +544,11 @@ final class Program_CPT {
 
 	/**
 	 * Save metabox data.
+	 *
+	 * @param int      $post_id Program post ID.
+	 * @param \WP_Post $post    Program post object.
 	 */
-	public static function save_meta( int $post_id, \WP_Post $post ): void {
+	public static function save_meta( int $post_id, \WP_Post $post ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- required by the save_post_{$post_type} signature.
 		$nonce = isset( $_POST['shelter_program_nonce'] )
 			? sanitize_text_field( wp_unslash( $_POST['shelter_program_nonce'] ) )
 			: '';
@@ -538,29 +566,43 @@ final class Program_CPT {
 		}
 
 		// Recurrence days is a checkbox array.
-		$days = isset( $_POST['shelter_prog_recurrence_days'] )
+		$days       = isset( $_POST['shelter_prog_recurrence_days'] )
 			? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['shelter_prog_recurrence_days'] ) )
-			: [];
-		$valid_days = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
-		$days = array_intersect( $days, $valid_days );
+			: array();
+		$valid_days = array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' );
+		$days       = array_intersect( $days, $valid_days );
 		update_post_meta( $post_id, self::META_PREFIX . 'recurrence_days', $days );
 
 		// Checkbox fields (value="yes" if checked, "no" if not).
-		$checkbox_fields = [ 'active', 'requires_appointment', 'featured', 'variable_pricing' ];
+		$checkbox_fields = array( 'active', 'requires_appointment', 'featured', 'variable_pricing' );
 		foreach ( $checkbox_fields as $field ) {
 			$value = isset( $_POST[ 'shelter_prog_' . $field ] ) ? 'yes' : 'no';
 			update_post_meta( $post_id, self::META_PREFIX . $field, $value );
 		}
 
 		// Text fields.
-		$text_fields = [
-			'start_time', 'end_time', 'timezone',
-			'venue_name', 'venue_address', 'venue_city', 'venue_state', 'venue_zip',
-			'organizer_name', 'organizer_phone', 'organizer_email', 'organizer_website',
-			'cost', 'currency_symbol', 'capacity', 'contact_email',
-			'age_restriction', 'tags',
-			'website_url', 'facebook_url',
-		];
+		$text_fields = array(
+			'start_time',
+			'end_time',
+			'timezone',
+			'venue_name',
+			'venue_address',
+			'venue_city',
+			'venue_state',
+			'venue_zip',
+			'organizer_name',
+			'organizer_phone',
+			'organizer_email',
+			'organizer_website',
+			'cost',
+			'currency_symbol',
+			'capacity',
+			'contact_email',
+			'age_restriction',
+			'tags',
+			'website_url',
+			'facebook_url',
+		);
 
 		foreach ( $text_fields as $field ) {
 			$key   = 'shelter_prog_' . $field;
@@ -584,15 +626,15 @@ final class Program_CPT {
 	 */
 	public static function parse_blackout_dates( string $raw ): array {
 		if ( trim( $raw ) === '' ) {
-			return [];
+			return array();
 		}
 
 		$lines = preg_split( '/[\r\n,]+/', $raw );
-		$dates = [];
+		$dates = array();
 
 		foreach ( $lines as $line ) {
 			$line = trim( $line );
-			if ( $line === '' ) {
+			if ( '' === $line ) {
 				continue;
 			}
 			// Accept YYYY-MM-DD format only.
@@ -611,12 +653,15 @@ final class Program_CPT {
 
 	/**
 	 * Add custom columns to the programs list table.
+	 *
+	 * @param array $columns Existing list table columns.
+	 * @return array Columns with the schedule columns inserted after the title.
 	 */
 	public static function admin_columns( array $columns ): array {
-		$new = [];
+		$new = array();
 		foreach ( $columns as $key => $label ) {
 			$new[ $key ] = $label;
-			if ( $key === 'title' ) {
+			if ( 'title' === $key ) {
 				$new['shelter_days']   = __( 'Days', 'shelter-events-wrapper' );
 				$new['shelter_time']   = __( 'Time', 'shelter-events-wrapper' );
 				$new['shelter_cost']   = __( 'Cost', 'shelter-events-wrapper' );
@@ -628,6 +673,9 @@ final class Program_CPT {
 
 	/**
 	 * Render custom column content.
+	 *
+	 * @param string $column  Column key being rendered.
+	 * @param int    $post_id Program post ID for the current row.
 	 */
 	public static function admin_column_content( string $column, int $post_id ): void {
 		$meta = self::get_all_meta( $post_id );
@@ -635,9 +683,17 @@ final class Program_CPT {
 		switch ( $column ) {
 			case 'shelter_days':
 				$days = (array) $meta['recurrence_days'];
-				echo esc_html( implode( ', ', array_map( function ( $d ) {
-					return ucfirst( substr( $d, 0, 3 ) );
-				}, $days ) ) );
+				echo esc_html(
+					implode(
+						', ',
+						array_map(
+							function ( $d ) {
+								return ucfirst( substr( $d, 0, 3 ) );
+							},
+							$days
+						)
+					)
+				);
 				break;
 
 			case 'shelter_time':
@@ -645,12 +701,12 @@ final class Program_CPT {
 				break;
 
 			case 'shelter_cost':
-				if ( $meta['variable_pricing'] === 'yes' ) {
+				if ( 'yes' === $meta['variable_pricing'] ) {
 					echo esc_html__( 'Varies', 'shelter-events-wrapper' );
 				} else {
 					$cost = $meta['cost'];
 					echo esc_html(
-						( $cost === '0' || $cost === '' )
+						( '0' === $cost || '' === $cost )
 							? __( 'Free', 'shelter-events-wrapper' )
 							: $meta['currency_symbol'] . $cost
 					);
@@ -658,7 +714,7 @@ final class Program_CPT {
 				break;
 
 			case 'shelter_active':
-				echo $meta['active'] === 'yes'
+				echo 'yes' === $meta['active']
 					? '<span style="color:green;">&#9679; ' . esc_html__( 'Active', 'shelter-events-wrapper' ) . '</span>'
 					: '<span style="color:#999;">&#9675; ' . esc_html__( 'Paused', 'shelter-events-wrapper' ) . '</span>';
 				break;
@@ -674,11 +730,11 @@ final class Program_CPT {
 	 * @return array<string, mixed> Associative array of field values.
 	 */
 	public static function get_all_meta( int $post_id ): array {
-		$data = [];
+		$data = array();
 		foreach ( self::FIELDS as $field => $def ) {
 			$raw = get_post_meta( $post_id, self::META_PREFIX . $field, true );
 
-			if ( $raw === '' || $raw === false ) {
+			if ( '' === $raw || false === $raw ) {
 				$data[ $field ] = $def['default'];
 			} else {
 				$data[ $field ] = $raw;
@@ -694,17 +750,19 @@ final class Program_CPT {
 	 *                           matching the shape the Event_Generator expects.
 	 */
 	public static function get_active_programs(): array {
-		$posts = get_posts( [
-			'post_type'   => self::POST_TYPE,
-			'post_status' => 'publish',
-			'numberposts' => -1,
-		] );
+		$posts = get_posts(
+			array(
+				'post_type'   => self::POST_TYPE,
+				'post_status' => 'publish',
+				'numberposts' => -1,
+			)
+		);
 
-		$programs = [];
+		$programs = array();
 		foreach ( $posts as $post ) {
 			$meta = self::get_all_meta( $post->ID );
 
-			if ( $meta['active'] !== 'yes' ) {
+			if ( 'yes' !== $meta['active'] ) {
 				continue;
 			}
 
@@ -712,53 +770,53 @@ final class Program_CPT {
 				continue;
 			}
 
-			$programs[ $post->ID ] = [
-				'post_id'     => $post->ID,
-				'slug'        => $post->post_name,
-				'title'       => $post->post_title,
-				'description' => $post->post_content,
-				'category'    => '', // Will be set from taxonomy term if assigned.
-				'recurrence'  => [
+			$programs[ $post->ID ] = array(
+				'post_id'         => $post->ID,
+				'slug'            => $post->post_name,
+				'title'           => $post->post_title,
+				'description'     => $post->post_content,
+				'category'        => '', // Will be set from taxonomy term if assigned.
+				'recurrence'      => array(
 					'days'       => (array) $meta['recurrence_days'],
 					'start_time' => $meta['start_time'],
 					'end_time'   => $meta['end_time'],
 					'timezone'   => $meta['timezone'],
-				],
-				'venue'       => [
+				),
+				'venue'           => array(
 					'venue'   => $meta['venue_name'],
 					'address' => $meta['venue_address'],
 					'city'    => $meta['venue_city'],
 					'state'   => $meta['venue_state'],
 					'zip'     => $meta['venue_zip'],
-				],
-				'organizer'   => [
+				),
+				'organizer'       => array(
 					'organizer' => $meta['organizer_name'],
 					'phone'     => $meta['organizer_phone'],
 					'email'     => $meta['organizer_email'],
 					'website'   => $meta['organizer_website'],
-				],
+				),
 				'cost'            => $meta['cost'],
 				'currency_symbol' => $meta['currency_symbol'],
-				'featured'        => $meta['featured'] === 'yes',
+				'featured'        => 'yes' === $meta['featured'],
 				'tags'            => array_filter( array_map( 'trim', explode( ',', $meta['tags'] ) ) ),
 				'website_url'     => $meta['website_url'],
 				'facebook_url'    => $meta['facebook_url'],
 				'blackout_dates'  => self::parse_blackout_dates( $meta['blackout_dates'] ),
-				'meta'            => [
+				'meta'            => array(
 					'_shelter_program'              => $post->post_name,
 					'_shelter_capacity'             => $meta['capacity'],
 					'_shelter_contact_email'        => $meta['contact_email'],
 					'_shelter_requires_appointment' => $meta['requires_appointment'],
 					'_shelter_age_restriction'      => $meta['age_restriction'],
 					'_shelter_variable_pricing'     => $meta['variable_pricing'],
-				],
-			];
+				),
+			);
 
 			// Attach taxonomy term as category.
-			$terms = wp_get_object_terms( $post->ID, 'shelter_program_cat', [ 'fields' => 'slugs' ] );
+			$terms = wp_get_object_terms( $post->ID, 'shelter_program_cat', array( 'fields' => 'slugs' ) );
 			if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-				$programs[ $post->ID ]['category'] = $terms[0];
-				$programs[ $post->ID ]['event_cat'] = wp_get_object_terms( $post->ID, 'shelter_program_cat', [ 'fields' => 'names' ] );
+				$programs[ $post->ID ]['category']  = $terms[0];
+				$programs[ $post->ID ]['event_cat'] = wp_get_object_terms( $post->ID, 'shelter_program_cat', array( 'fields' => 'names' ) );
 			}
 		}
 
