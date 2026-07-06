@@ -139,6 +139,7 @@
 /* ── Responsive ───────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 782px) {
+
 	.shelter-help__content {
 		padding: 20px 16px;
 	}

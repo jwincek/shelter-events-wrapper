@@ -6,7 +6,7 @@ Built on the same layered architecture as the shelter-pet-sync plugin.
 
 ## Requirements
 
-- WordPress 6.7+ (the Abilities API integration activates on 6.9+)
+- WordPress 6.9+
 - PHP 8.1+
 - [The Events Calendar](https://wordpress.org/plugins/the-events-calendar/) (free version)
 

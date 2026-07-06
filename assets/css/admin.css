@@ -36,6 +36,7 @@
 .shelter-replace-action {
 	color: #d63638;
 }
+
 .shelter-replace-action:hover {
 	color: #a00;
 }
@@ -49,14 +50,17 @@
 	font-weight: 500;
 	line-height: 1.5;
 }
+
 .shelter-status--active {
 	background: #edfaef;
 	color: #1e7e34;
 }
+
 .shelter-status--cancelled {
 	background: #fce8e8;
 	color: #d63638;
 }
+
 .shelter-status--replaced {
 	background: #fff8e5;
 	color: #996800;
@@ -78,18 +82,22 @@
 	gap: 2rem;
 	align-items: flex-start;
 }
+
 .shelter-blackout-layout__input {
 	flex: 1;
 	max-width: 300px;
 }
+
 .shelter-blackout-layout__summary {
 	flex: 1;
 }
+
 .shelter-blackout-list {
 	margin: 0.5rem 0 0;
 	padding-left: 1.25rem;
 }
-.shelter-blackout-list li {
+
+.shelter-events-admin .shelter-blackout-list li {
 	margin-bottom: 0.25rem;
 	font-size: 13px;
 }

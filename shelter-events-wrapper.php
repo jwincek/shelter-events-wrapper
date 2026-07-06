@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/jwincek/vcpahumane-shelter-events-wrapper
  * Description: Manages recurring shelter events (BINGO, clinics, etc.) as a custom post type with a staff-friendly UI, generating The Events Calendar events automatically via WP-Cron.
  * Version: 2.2.0
- * Requires at least: 6.7
+ * Requires at least: 6.9
  * Requires PHP: 8.1
  * Requires Plugins: the-events-calendar
  * Author: VCPA Humane Society

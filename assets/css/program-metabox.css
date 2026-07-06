@@ -159,19 +159,20 @@
 	user-select: none;
 }
 
+.shelter-metabox__day-chip:hover span {
+	border-color: #2271b1;
+}
+
 .shelter-metabox__day-chip input:checked + span {
 	background: #2271b1;
 	border-color: #2271b1;
 	color: #fff;
 }
 
-.shelter-metabox__day-chip:hover span {
-	border-color: #2271b1;
-}
-
 /* ── Responsive ───────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 782px) {
+
 	.shelter-metabox__field--half,
 	.shelter-metabox__field--third,
 	.shelter-metabox__field--quarter {

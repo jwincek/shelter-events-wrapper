@@ -1,7 +1,7 @@
 === Shelter Events Wrapper ===
 Contributors: jeromewincek
 Tags: events, recurring events, animal shelter, the events calendar, nonprofit
-Requires at least: 6.7
+Requires at least: 6.9
 Tested up to: 7.0
 Stable tag: 2.2.0
 Requires PHP: 8.1
@@ -33,7 +33,7 @@ Venues and organizers are matched by exact name and reused, so repeated generati
 
 * The Events Calendar (free) — declared via the plugin dependency header, so WordPress will ask you to install and activate it first.
 * PHP 8.1 or newer.
-* The Abilities API integration activates automatically on WordPress 6.9+; all other features work on WordPress 6.7+.
+* WordPress 6.9 or newer.
 
 == Installation ==
 
