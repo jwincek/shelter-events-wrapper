@@ -34,7 +34,7 @@ registerBlockType( 'shelter-events/event-list', {
 		}, [] );
 
 		const programOptions = [
-			{ label: __( '— All Programs —', 'shelter-events' ), value: '' },
+			{ label: __( '— All Programs —', 'shelter-events-wrapper' ), value: '' },
 			...programs.map( ( p ) => ( {
 				label: `${ p.title } (${ p.days.map( ( d ) => d.charAt( 0 ).toUpperCase() + d.slice( 1 ) ).join( ', ' ) })`,
 				value: p.slug,
@@ -44,7 +44,7 @@ registerBlockType( 'shelter-events/event-list', {
 		const programControl = loading
 			? el( Spinner, {} )
 			: el( SelectControl, {
-				label: __( 'Program', 'shelter-events' ),
+				label: __( 'Program', 'shelter-events-wrapper' ),
 				value: program,
 				options: programOptions,
 				onChange: ( val ) => setAttributes( { program: val } ),
@@ -58,36 +58,36 @@ registerBlockType( 'shelter-events/event-list', {
 				{},
 				el(
 					PanelBody,
-					{ title: __( 'Event Settings', 'shelter-events' ) },
+					{ title: __( 'Event Settings', 'shelter-events-wrapper' ) },
 					programControl,
 					el( RangeControl, {
-						label: __( 'Number of Events', 'shelter-events' ),
+						label: __( 'Number of Events', 'shelter-events-wrapper' ),
 						value: count,
 						onChange: ( val ) => setAttributes( { count: val } ),
 						min: 1,
 						max: 20,
 					} ),
 					el( SelectControl, {
-						label: __( 'Layout', 'shelter-events' ),
+						label: __( 'Layout', 'shelter-events-wrapper' ),
 						value: layout,
 						options: [
-							{ label: __( 'List', 'shelter-events' ), value: 'list' },
-							{ label: __( 'Card Grid', 'shelter-events' ), value: 'card' },
-							{ label: __( 'Compact', 'shelter-events' ), value: 'compact' },
+							{ label: __( 'List', 'shelter-events-wrapper' ), value: 'list' },
+							{ label: __( 'Card Grid', 'shelter-events-wrapper' ), value: 'card' },
+							{ label: __( 'Compact', 'shelter-events-wrapper' ), value: 'compact' },
 						],
 						onChange: ( val ) => setAttributes( { layout: val } ),
 					} )
 				),
 				el(
 					PanelBody,
-					{ title: __( 'Display Options', 'shelter-events' ), initialOpen: false },
+					{ title: __( 'Display Options', 'shelter-events-wrapper' ), initialOpen: false },
 					el( ToggleControl, {
-						label: __( 'Show Cost', 'shelter-events' ),
+						label: __( 'Show Cost', 'shelter-events-wrapper' ),
 						checked: showCost,
 						onChange: ( val ) => setAttributes( { showCost: val } ),
 					} ),
 					el( ToggleControl, {
-						label: __( 'Show Venue', 'shelter-events' ),
+						label: __( 'Show Venue', 'shelter-events-wrapper' ),
 						checked: showVenue,
 						onChange: ( val ) => setAttributes( { showVenue: val } ),
 					} )
@@ -97,12 +97,12 @@ registerBlockType( 'shelter-events/event-list', {
 				Placeholder,
 				{
 					icon: 'calendar-alt',
-					label: __( 'Shelter Event List', 'shelter-events' ),
+					label: __( 'Shelter Event List', 'shelter-events-wrapper' ),
 					instructions: program
-						? __( 'Showing upcoming events for: ', 'shelter-events' ) + program
-						: __( 'Showing all upcoming shelter events.', 'shelter-events' ),
+						? __( 'Showing upcoming events for: ', 'shelter-events-wrapper' ) + program
+						: __( 'Showing all upcoming shelter events.', 'shelter-events-wrapper' ),
 				},
-				el( 'p', {}, __( 'This block renders on the front end.', 'shelter-events' ) )
+				el( 'p', {}, __( 'This block renders on the front end.', 'shelter-events-wrapper' ) )
 			)
 		);
 	},

@@ -24,8 +24,8 @@ class Shelter_Events_Help {
 	public function add_menu_page(): void {
 		add_submenu_page(
 			'edit.php?post_type=tribe_events',
-			__( 'Shelter Events — Help & Documentation', 'shelter-events' ),
-			__( 'Staff Guide & Help', 'shelter-events' ),
+			__( 'Shelter Events — Help & Documentation', 'shelter-events-wrapper' ),
+			__( 'Staff Guide & Help', 'shelter-events-wrapper' ),
 			'edit_posts',
 			'shelter-events-help',
 			[ $this, 'render_page' ]
@@ -55,8 +55,8 @@ class Shelter_Events_Help {
 		$readme_path = SHELTER_EVENTS_DIR . 'README.md';
 
 		if ( ! file_exists( $readme_path ) ) {
-			echo '<div class="wrap"><h1>' . esc_html__( 'Help', 'shelter-events' ) . '</h1>';
-			echo '<p>' . esc_html__( 'README.md not found.', 'shelter-events' ) . '</p></div>';
+			echo '<div class="wrap"><h1>' . esc_html__( 'Help', 'shelter-events-wrapper' ) . '</h1>';
+			echo '<p>' . esc_html__( 'README.md not found.', 'shelter-events-wrapper' ) . '</p></div>';
 			return;
 		}
 
@@ -65,14 +65,14 @@ class Shelter_Events_Help {
 
 		?>
 		<div class="wrap shelter-events-help">
-			<h1><?php esc_html_e( 'Shelter Events — Help & Documentation', 'shelter-events' ); ?></h1>
+			<h1><?php esc_html_e( 'Shelter Events — Help & Documentation', 'shelter-events-wrapper' ); ?></h1>
 
 			<div class="shelter-help__nav">
-				<a href="#staff-guide" class="button"><?php esc_html_e( 'Staff Guide', 'shelter-events' ); ?></a>
-				<a href="#developer-guide" class="button"><?php esc_html_e( 'Developer Guide', 'shelter-events' ); ?></a>
-				<a href="#changelog" class="button"><?php esc_html_e( 'Changelog', 'shelter-events' ); ?></a>
+				<a href="#staff-guide" class="button"><?php esc_html_e( 'Staff Guide', 'shelter-events-wrapper' ); ?></a>
+				<a href="#developer-guide" class="button"><?php esc_html_e( 'Developer Guide', 'shelter-events-wrapper' ); ?></a>
+				<a href="#changelog" class="button"><?php esc_html_e( 'Changelog', 'shelter-events-wrapper' ); ?></a>
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=shelter_program' ) ); ?>" class="button button-primary">
-					<?php esc_html_e( 'Manage Programs', 'shelter-events' ); ?>
+					<?php esc_html_e( 'Manage Programs', 'shelter-events-wrapper' ); ?>
 				</a>
 			</div>
 

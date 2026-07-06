@@ -181,18 +181,18 @@ final class Program_CPT {
 
 		register_post_type( self::POST_TYPE, [
 			'labels' => [
-				'name'               => __( 'Programs', 'shelter-events' ),
-				'singular_name'      => __( 'Program', 'shelter-events' ),
-				'menu_name'          => __( 'Shelter Programs', 'shelter-events' ),
-				'add_new'            => __( 'Add New Program', 'shelter-events' ),
-				'add_new_item'       => __( 'Add New Program', 'shelter-events' ),
-				'edit_item'          => __( 'Edit Program', 'shelter-events' ),
-				'new_item'           => __( 'New Program', 'shelter-events' ),
-				'view_item'          => __( 'View Program', 'shelter-events' ),
-				'search_items'       => __( 'Search Programs', 'shelter-events' ),
-				'not_found'          => __( 'No programs found.', 'shelter-events' ),
-				'not_found_in_trash' => __( 'No programs found in trash.', 'shelter-events' ),
-				'all_items'          => __( 'All Programs', 'shelter-events' ),
+				'name'               => __( 'Programs', 'shelter-events-wrapper' ),
+				'singular_name'      => __( 'Program', 'shelter-events-wrapper' ),
+				'menu_name'          => __( 'Shelter Programs', 'shelter-events-wrapper' ),
+				'add_new'            => __( 'Add New Program', 'shelter-events-wrapper' ),
+				'add_new_item'       => __( 'Add New Program', 'shelter-events-wrapper' ),
+				'edit_item'          => __( 'Edit Program', 'shelter-events-wrapper' ),
+				'new_item'           => __( 'New Program', 'shelter-events-wrapper' ),
+				'view_item'          => __( 'View Program', 'shelter-events-wrapper' ),
+				'search_items'       => __( 'Search Programs', 'shelter-events-wrapper' ),
+				'not_found'          => __( 'No programs found.', 'shelter-events-wrapper' ),
+				'not_found_in_trash' => __( 'No programs found in trash.', 'shelter-events-wrapper' ),
+				'all_items'          => __( 'All Programs', 'shelter-events-wrapper' ),
 			],
 			'public'             => false,
 			'show_ui'            => true,
@@ -231,7 +231,7 @@ final class Program_CPT {
 	public static function add_meta_boxes(): void {
 		add_meta_box(
 			'shelter-program-schedule',
-			__( 'Event Schedule Settings', 'shelter-events' ),
+			__( 'Event Schedule Settings', 'shelter-events-wrapper' ),
 			[ __CLASS__, 'render_metabox' ],
 			self::POST_TYPE,
 			'normal',
@@ -259,7 +259,7 @@ final class Program_CPT {
 						'%d existing event was updated to match this program.',
 						'%d existing events were updated to match this program.',
 						$sync_count,
-						'shelter-events'
+						'shelter-events-wrapper'
 					) ),
 					$sync_count
 				)
@@ -267,13 +267,13 @@ final class Program_CPT {
 		}
 
 		$days_of_week = [
-			'monday'    => __( 'Monday', 'shelter-events' ),
-			'tuesday'   => __( 'Tuesday', 'shelter-events' ),
-			'wednesday' => __( 'Wednesday', 'shelter-events' ),
-			'thursday'  => __( 'Thursday', 'shelter-events' ),
-			'friday'    => __( 'Friday', 'shelter-events' ),
-			'saturday'  => __( 'Saturday', 'shelter-events' ),
-			'sunday'    => __( 'Sunday', 'shelter-events' ),
+			'monday'    => __( 'Monday', 'shelter-events-wrapper' ),
+			'tuesday'   => __( 'Tuesday', 'shelter-events-wrapper' ),
+			'wednesday' => __( 'Wednesday', 'shelter-events-wrapper' ),
+			'thursday'  => __( 'Thursday', 'shelter-events-wrapper' ),
+			'friday'    => __( 'Friday', 'shelter-events-wrapper' ),
+			'saturday'  => __( 'Saturday', 'shelter-events-wrapper' ),
+			'sunday'    => __( 'Sunday', 'shelter-events-wrapper' ),
 		];
 		?>
 		<div class="shelter-metabox">
@@ -284,25 +284,25 @@ final class Program_CPT {
 					<label>
 						<input type="checkbox" name="shelter_prog_active" value="yes"
 							<?php checked( $meta['active'], 'yes' ); ?> />
-						<strong><?php esc_html_e( 'Active', 'shelter-events' ); ?></strong>
-						— <?php esc_html_e( 'When checked, the daily cron will generate event instances for this program.', 'shelter-events' ); ?>
+						<strong><?php esc_html_e( 'Active', 'shelter-events-wrapper' ); ?></strong>
+						— <?php esc_html_e( 'When checked, the daily cron will generate event instances for this program.', 'shelter-events-wrapper' ); ?>
 					</label>
 				</div>
 				<div class="shelter-metabox__sync-option">
 					<label>
 						<input type="checkbox" name="shelter_sync_include_past" value="1" />
-						<?php esc_html_e( 'Also update past events when saving changes', 'shelter-events' ); ?>
+						<?php esc_html_e( 'Also update past events when saving changes', 'shelter-events-wrapper' ); ?>
 					</label>
-					<span class="description"><?php esc_html_e( '(Leave unchecked to only update future events.)', 'shelter-events' ); ?></span>
+					<span class="description"><?php esc_html_e( '(Leave unchecked to only update future events.)', 'shelter-events-wrapper' ); ?></span>
 				</div>
 			</div>
 
 			<!-- Section: Schedule -->
 			<fieldset class="shelter-metabox__section">
-				<legend><?php esc_html_e( 'Schedule', 'shelter-events' ); ?></legend>
+				<legend><?php esc_html_e( 'Schedule', 'shelter-events-wrapper' ); ?></legend>
 
 				<div class="shelter-metabox__field">
-					<label><?php esc_html_e( 'Recurring days', 'shelter-events' ); ?></label>
+					<label><?php esc_html_e( 'Recurring days', 'shelter-events-wrapper' ); ?></label>
 					<div class="shelter-metabox__days">
 						<?php foreach ( $days_of_week as $value => $label ) : ?>
 							<label class="shelter-metabox__day-chip">
@@ -317,13 +317,13 @@ final class Program_CPT {
 
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_start_time"><?php esc_html_e( 'Start time', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_start_time"><?php esc_html_e( 'Start time', 'shelter-events-wrapper' ); ?></label>
 						<input type="time" id="shelter_prog_start_time"
 							name="shelter_prog_start_time"
 							value="<?php echo esc_attr( $meta['start_time'] ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_end_time"><?php esc_html_e( 'End time', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_end_time"><?php esc_html_e( 'End time', 'shelter-events-wrapper' ); ?></label>
 						<input type="time" id="shelter_prog_end_time"
 							name="shelter_prog_end_time"
 							value="<?php echo esc_attr( $meta['end_time'] ); ?>" />
@@ -331,7 +331,7 @@ final class Program_CPT {
 				</div>
 
 				<div class="shelter-metabox__field">
-					<label for="shelter_prog_timezone"><?php esc_html_e( 'Timezone', 'shelter-events' ); ?></label>
+					<label for="shelter_prog_timezone"><?php esc_html_e( 'Timezone', 'shelter-events-wrapper' ); ?></label>
 					<select id="shelter_prog_timezone" name="shelter_prog_timezone">
 						<?php
 						$timezones = timezone_identifiers_list();
@@ -346,44 +346,44 @@ final class Program_CPT {
 				</div>
 
 				<div class="shelter-metabox__field">
-					<label for="shelter_prog_blackout_dates"><?php esc_html_e( 'Blackout dates', 'shelter-events' ); ?></label>
+					<label for="shelter_prog_blackout_dates"><?php esc_html_e( 'Blackout dates', 'shelter-events-wrapper' ); ?></label>
 					<textarea id="shelter_prog_blackout_dates" name="shelter_prog_blackout_dates"
 						class="widefat" rows="3"
-						placeholder="<?php esc_attr_e( 'One date per line: 2026-12-25', 'shelter-events' ); ?>"
+						placeholder="<?php esc_attr_e( 'One date per line: 2026-12-25', 'shelter-events-wrapper' ); ?>"
 					><?php echo esc_textarea( $meta['blackout_dates'] ); ?></textarea>
 					<span class="description">
-						<?php esc_html_e( 'Dates when this program should not generate events (YYYY-MM-DD, one per line). These are checked in addition to the global blackout dates.', 'shelter-events' ); ?>
+						<?php esc_html_e( 'Dates when this program should not generate events (YYYY-MM-DD, one per line). These are checked in addition to the global blackout dates.', 'shelter-events-wrapper' ); ?>
 					</span>
 				</div>
 			</fieldset>
 
 			<!-- Section: Venue -->
 			<fieldset class="shelter-metabox__section">
-				<legend><?php esc_html_e( 'Venue', 'shelter-events' ); ?></legend>
+				<legend><?php esc_html_e( 'Venue', 'shelter-events-wrapper' ); ?></legend>
 				<div class="shelter-metabox__field">
-					<label for="shelter_prog_venue_name"><?php esc_html_e( 'Venue name', 'shelter-events' ); ?></label>
+					<label for="shelter_prog_venue_name"><?php esc_html_e( 'Venue name', 'shelter-events-wrapper' ); ?></label>
 					<input type="text" id="shelter_prog_venue_name" name="shelter_prog_venue_name"
 						value="<?php echo esc_attr( $meta['venue_name'] ); ?>" class="widefat"
-						placeholder="<?php esc_attr_e( 'e.g. VCPA Humane Society — Main Hall', 'shelter-events' ); ?>" />
+						placeholder="<?php esc_attr_e( 'e.g. VCPA Humane Society — Main Hall', 'shelter-events-wrapper' ); ?>" />
 				</div>
 				<div class="shelter-metabox__field">
-					<label for="shelter_prog_venue_address"><?php esc_html_e( 'Street address', 'shelter-events' ); ?></label>
+					<label for="shelter_prog_venue_address"><?php esc_html_e( 'Street address', 'shelter-events-wrapper' ); ?></label>
 					<input type="text" id="shelter_prog_venue_address" name="shelter_prog_venue_address"
 						value="<?php echo esc_attr( $meta['venue_address'] ); ?>" class="widefat" />
 				</div>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--third">
-						<label for="shelter_prog_venue_city"><?php esc_html_e( 'City', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_venue_city"><?php esc_html_e( 'City', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_venue_city" name="shelter_prog_venue_city"
 							value="<?php echo esc_attr( $meta['venue_city'] ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--third">
-						<label for="shelter_prog_venue_state"><?php esc_html_e( 'State', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_venue_state"><?php esc_html_e( 'State', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_venue_state" name="shelter_prog_venue_state"
 							value="<?php echo esc_attr( $meta['venue_state'] ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--third">
-						<label for="shelter_prog_venue_zip"><?php esc_html_e( 'ZIP', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_venue_zip"><?php esc_html_e( 'ZIP', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_venue_zip" name="shelter_prog_venue_zip"
 							value="<?php echo esc_attr( $meta['venue_zip'] ); ?>" />
 					</div>
@@ -392,27 +392,27 @@ final class Program_CPT {
 
 			<!-- Section: Organizer -->
 			<fieldset class="shelter-metabox__section">
-				<legend><?php esc_html_e( 'Organizer', 'shelter-events' ); ?></legend>
+				<legend><?php esc_html_e( 'Organizer', 'shelter-events-wrapper' ); ?></legend>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_organizer_name"><?php esc_html_e( 'Name', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_organizer_name"><?php esc_html_e( 'Name', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_organizer_name" name="shelter_prog_organizer_name"
 							value="<?php echo esc_attr( $meta['organizer_name'] ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_organizer_phone"><?php esc_html_e( 'Phone', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_organizer_phone"><?php esc_html_e( 'Phone', 'shelter-events-wrapper' ); ?></label>
 						<input type="tel" id="shelter_prog_organizer_phone" name="shelter_prog_organizer_phone"
 							value="<?php echo esc_attr( $meta['organizer_phone'] ); ?>" />
 					</div>
 				</div>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_organizer_email"><?php esc_html_e( 'Email', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_organizer_email"><?php esc_html_e( 'Email', 'shelter-events-wrapper' ); ?></label>
 						<input type="email" id="shelter_prog_organizer_email" name="shelter_prog_organizer_email"
 							value="<?php echo esc_attr( $meta['organizer_email'] ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_organizer_website"><?php esc_html_e( 'Website', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_organizer_website"><?php esc_html_e( 'Website', 'shelter-events-wrapper' ); ?></label>
 						<input type="url" id="shelter_prog_organizer_website" name="shelter_prog_organizer_website"
 							value="<?php echo esc_attr( $meta['organizer_website'] ); ?>" />
 					</div>
@@ -421,45 +421,45 @@ final class Program_CPT {
 
 			<!-- Section: Pricing & Logistics -->
 			<fieldset class="shelter-metabox__section">
-				<legend><?php esc_html_e( 'Pricing & Logistics', 'shelter-events' ); ?></legend>
+				<legend><?php esc_html_e( 'Pricing & Logistics', 'shelter-events-wrapper' ); ?></legend>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--quarter">
-						<label for="shelter_prog_currency_symbol"><?php esc_html_e( 'Currency', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_currency_symbol"><?php esc_html_e( 'Currency', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_currency_symbol" name="shelter_prog_currency_symbol"
 							value="<?php echo esc_attr( $meta['currency_symbol'] ); ?>" style="width:60px;" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--quarter">
-						<label for="shelter_prog_cost"><?php esc_html_e( 'Cost', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_cost"><?php esc_html_e( 'Cost', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_cost" name="shelter_prog_cost"
 							value="<?php echo esc_attr( $meta['cost'] ); ?>"
-							placeholder="<?php esc_attr_e( '0 = Free', 'shelter-events' ); ?>" />
+							placeholder="<?php esc_attr_e( '0 = Free', 'shelter-events-wrapper' ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--quarter">
 						<label>
 							<input type="checkbox" name="shelter_prog_variable_pricing" value="yes"
 								<?php checked( $meta['variable_pricing'], 'yes' ); ?> />
-							<?php esc_html_e( 'Variable pricing', 'shelter-events' ); ?>
+							<?php esc_html_e( 'Variable pricing', 'shelter-events-wrapper' ); ?>
 						</label>
-						<span class="description"><?php esc_html_e( 'Displays "Varies" instead of a fixed cost.', 'shelter-events' ); ?></span>
+						<span class="description"><?php esc_html_e( 'Displays "Varies" instead of a fixed cost.', 'shelter-events-wrapper' ); ?></span>
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--quarter">
-						<label for="shelter_prog_capacity"><?php esc_html_e( 'Capacity', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_capacity"><?php esc_html_e( 'Capacity', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_capacity" name="shelter_prog_capacity"
 							value="<?php echo esc_attr( $meta['capacity'] ); ?>"
-							placeholder="<?php esc_attr_e( 'e.g. 120', 'shelter-events' ); ?>" />
+							placeholder="<?php esc_attr_e( 'e.g. 120', 'shelter-events-wrapper' ); ?>" />
 					</div>
 				</div>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--quarter">
-						<label for="shelter_prog_age_restriction"><?php esc_html_e( 'Age restriction', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_age_restriction"><?php esc_html_e( 'Age restriction', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_age_restriction" name="shelter_prog_age_restriction"
 							value="<?php echo esc_attr( $meta['age_restriction'] ); ?>"
-							placeholder="<?php esc_attr_e( 'e.g. 18+', 'shelter-events' ); ?>" />
+							placeholder="<?php esc_attr_e( 'e.g. 18+', 'shelter-events-wrapper' ); ?>" />
 					</div>
 				</div>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_contact_email"><?php esc_html_e( 'Contact email', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_contact_email"><?php esc_html_e( 'Contact email', 'shelter-events-wrapper' ); ?></label>
 						<input type="email" id="shelter_prog_contact_email" name="shelter_prog_contact_email"
 							value="<?php echo esc_attr( $meta['contact_email'] ); ?>" />
 					</div>
@@ -467,7 +467,7 @@ final class Program_CPT {
 						<label>
 							<input type="checkbox" name="shelter_prog_requires_appointment" value="yes"
 								<?php checked( $meta['requires_appointment'], 'yes' ); ?> />
-							<?php esc_html_e( 'Requires appointment', 'shelter-events' ); ?>
+							<?php esc_html_e( 'Requires appointment', 'shelter-events-wrapper' ); ?>
 						</label>
 					</div>
 				</div>
@@ -475,39 +475,39 @@ final class Program_CPT {
 
 			<!-- Section: Event Links -->
 			<fieldset class="shelter-metabox__section">
-				<legend><?php esc_html_e( 'Event Links', 'shelter-events' ); ?></legend>
+				<legend><?php esc_html_e( 'Event Links', 'shelter-events-wrapper' ); ?></legend>
 				<p class="description" style="margin-top:0;">
-					<?php esc_html_e( 'The website URL is written to each generated event\'s "Event Website" field in The Events Calendar.', 'shelter-events' ); ?>
+					<?php esc_html_e( 'The website URL is written to each generated event\'s "Event Website" field in The Events Calendar.', 'shelter-events-wrapper' ); ?>
 				</p>
 				<div class="shelter-metabox__field">
-					<label for="shelter_prog_website_url"><?php esc_html_e( 'Website / Booking URL', 'shelter-events' ); ?></label>
+					<label for="shelter_prog_website_url"><?php esc_html_e( 'Website / Booking URL', 'shelter-events-wrapper' ); ?></label>
 					<input type="url" id="shelter_prog_website_url" name="shelter_prog_website_url"
 						value="<?php echo esc_attr( $meta['website_url'] ); ?>" class="widefat"
-						placeholder="<?php esc_attr_e( 'e.g. https://www.supersaas.com/schedule/Your_Org/CATS', 'shelter-events' ); ?>" />
+						placeholder="<?php esc_attr_e( 'e.g. https://www.supersaas.com/schedule/Your_Org/CATS', 'shelter-events-wrapper' ); ?>" />
 				</div>
 				<div class="shelter-metabox__field">
-					<label for="shelter_prog_facebook_url"><?php esc_html_e( 'Facebook Page URL', 'shelter-events' ); ?></label>
+					<label for="shelter_prog_facebook_url"><?php esc_html_e( 'Facebook Page URL', 'shelter-events-wrapper' ); ?></label>
 					<input type="url" id="shelter_prog_facebook_url" name="shelter_prog_facebook_url"
 						value="<?php echo esc_attr( $meta['facebook_url'] ); ?>" class="widefat"
-						placeholder="<?php esc_attr_e( 'e.g. https://www.facebook.com/YourShelterBingo', 'shelter-events' ); ?>" />
+						placeholder="<?php esc_attr_e( 'e.g. https://www.facebook.com/YourShelterBingo', 'shelter-events-wrapper' ); ?>" />
 				</div>
 			</fieldset>
 
 			<!-- Section: Event Display -->
 			<fieldset class="shelter-metabox__section">
-				<legend><?php esc_html_e( 'Event Display', 'shelter-events' ); ?></legend>
+				<legend><?php esc_html_e( 'Event Display', 'shelter-events-wrapper' ); ?></legend>
 				<div class="shelter-metabox__row">
 					<div class="shelter-metabox__field shelter-metabox__field--half">
-						<label for="shelter_prog_tags"><?php esc_html_e( 'Tags (comma-separated)', 'shelter-events' ); ?></label>
+						<label for="shelter_prog_tags"><?php esc_html_e( 'Tags (comma-separated)', 'shelter-events-wrapper' ); ?></label>
 						<input type="text" id="shelter_prog_tags" name="shelter_prog_tags"
 							value="<?php echo esc_attr( $meta['tags'] ); ?>" class="widefat"
-							placeholder="<?php esc_attr_e( 'bingo, fundraiser, community', 'shelter-events' ); ?>" />
+							placeholder="<?php esc_attr_e( 'bingo, fundraiser, community', 'shelter-events-wrapper' ); ?>" />
 					</div>
 					<div class="shelter-metabox__field shelter-metabox__field--half">
 						<label>
 							<input type="checkbox" name="shelter_prog_featured" value="yes"
 								<?php checked( $meta['featured'], 'yes' ); ?> />
-							<?php esc_html_e( 'Mark generated events as Featured', 'shelter-events' ); ?>
+							<?php esc_html_e( 'Mark generated events as Featured', 'shelter-events-wrapper' ); ?>
 						</label>
 					</div>
 				</div>
@@ -617,10 +617,10 @@ final class Program_CPT {
 		foreach ( $columns as $key => $label ) {
 			$new[ $key ] = $label;
 			if ( $key === 'title' ) {
-				$new['shelter_days']   = __( 'Days', 'shelter-events' );
-				$new['shelter_time']   = __( 'Time', 'shelter-events' );
-				$new['shelter_cost']   = __( 'Cost', 'shelter-events' );
-				$new['shelter_active'] = __( 'Active', 'shelter-events' );
+				$new['shelter_days']   = __( 'Days', 'shelter-events-wrapper' );
+				$new['shelter_time']   = __( 'Time', 'shelter-events-wrapper' );
+				$new['shelter_cost']   = __( 'Cost', 'shelter-events-wrapper' );
+				$new['shelter_active'] = __( 'Active', 'shelter-events-wrapper' );
 			}
 		}
 		return $new;
@@ -646,12 +646,12 @@ final class Program_CPT {
 
 			case 'shelter_cost':
 				if ( $meta['variable_pricing'] === 'yes' ) {
-					echo esc_html__( 'Varies', 'shelter-events' );
+					echo esc_html__( 'Varies', 'shelter-events-wrapper' );
 				} else {
 					$cost = $meta['cost'];
 					echo esc_html(
 						( $cost === '0' || $cost === '' )
-							? __( 'Free', 'shelter-events' )
+							? __( 'Free', 'shelter-events-wrapper' )
 							: $meta['currency_symbol'] . $cost
 					);
 				}
@@ -659,8 +659,8 @@ final class Program_CPT {
 
 			case 'shelter_active':
 				echo $meta['active'] === 'yes'
-					? '<span style="color:green;">&#9679; ' . esc_html__( 'Active', 'shelter-events' ) . '</span>'
-					: '<span style="color:#999;">&#9675; ' . esc_html__( 'Paused', 'shelter-events' ) . '</span>';
+					? '<span style="color:green;">&#9679; ' . esc_html__( 'Active', 'shelter-events-wrapper' ) . '</span>'
+					: '<span style="color:#999;">&#9675; ' . esc_html__( 'Paused', 'shelter-events-wrapper' ) . '</span>';
 				break;
 		}
 	}

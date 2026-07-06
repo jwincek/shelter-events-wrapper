@@ -39,7 +39,7 @@
 			"enum": [ "list", "card", "compact" ]
 		}
 	},
-	"textdomain": "shelter-events",
+	"textdomain": "shelter-events-wrapper",
 	"editorScript": "file:../../assets/js/editor.js",
 	"style": "file:../../assets/css/front.css"
 }

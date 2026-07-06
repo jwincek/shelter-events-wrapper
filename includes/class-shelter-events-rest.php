@@ -110,7 +110,7 @@ class Shelter_Events_REST {
 				'programme'        => get_post_meta( $event->ID, '_shelter_program_slug', true ),
 				'cancelled'        => (bool) get_post_meta( $event->ID, '_shelter_cancelled', true ),
 				'venue'            => tribe_get_venue( $event->ID ),
-				'cost'             => ( $variable === 'yes' ) ? __( 'Varies', 'shelter-events' ) : tribe_get_cost( $event->ID, true ),
+				'cost'             => ( $variable === 'yes' ) ? __( 'Varies', 'shelter-events-wrapper' ) : tribe_get_cost( $event->ID, true ),
 				'variable_pricing' => ( $variable === 'yes' ),
 			];
 		}

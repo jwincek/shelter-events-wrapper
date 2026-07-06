@@ -27,8 +27,8 @@ class Shelter_Events_Admin {
 	public function add_menu_page(): void {
 		add_submenu_page(
 			'edit.php?post_type=tribe_events',
-			__( 'Generate Events', 'shelter-events' ),
-			__( 'Generate Events', 'shelter-events' ),
+			__( 'Generate Events', 'shelter-events-wrapper' ),
+			__( 'Generate Events', 'shelter-events-wrapper' ),
 			'manage_options',
 			'shelter-events-generate',
 			[ $this, 'render_page' ]
@@ -43,11 +43,11 @@ class Shelter_Events_Admin {
 		$nonce = sanitize_text_field( wp_unslash( $_POST['shelter_generate_nonce'] ) );
 
 		if ( ! wp_verify_nonce( $nonce, 'shelter_generate_events' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events-wrapper' ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events-wrapper' ) );
 		}
 
 		$program_slug = sanitize_text_field( wp_unslash( $_POST['program'] ?? '' ) );
@@ -83,11 +83,11 @@ class Shelter_Events_Admin {
 		$nonce = sanitize_text_field( wp_unslash( $_POST['shelter_blackout_nonce'] ) );
 
 		if ( ! wp_verify_nonce( $nonce, 'shelter_save_blackout_dates' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events-wrapper' ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events-wrapper' ) );
 		}
 
 		$raw   = sanitize_textarea_field( wp_unslash( $_POST['shelter_blackout_dates'] ?? '' ) );
@@ -148,7 +148,7 @@ class Shelter_Events_Admin {
 		$actions['shelter_replace'] = sprintf(
 			'<a href="%s" class="shelter-replace-action">%s</a>',
 			esc_url( $url ),
-			esc_html__( 'Replace', 'shelter-events' )
+			esc_html__( 'Replace', 'shelter-events-wrapper' )
 		);
 
 		return $actions;
@@ -164,11 +164,11 @@ class Shelter_Events_Admin {
 
 		if ( ! $event_id
 			|| ! wp_verify_nonce( $nonce, 'shelter_replace_event_' . $event_id ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events-wrapper' ) );
 		}
 
 		if ( ! current_user_can( 'edit_others_posts' ) ) {
-			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events-wrapper' ) );
 		}
 
 		$result = \Shelter_Events\Abilities\Provider::handle_shelter_replace_event( [
@@ -176,7 +176,7 @@ class Shelter_Events_Admin {
 		] );
 
 		if ( ! $result['success'] ) {
-			wp_die( esc_html( $result['error'] ?? __( 'Replace failed.', 'shelter-events' ) ) );
+			wp_die( esc_html( $result['error'] ?? __( 'Replace failed.', 'shelter-events-wrapper' ) ) );
 		}
 
 		// Redirect to the block editor for the new replacement event.
@@ -209,10 +209,10 @@ class Shelter_Events_Admin {
 		?>
 		<div class="wrap shelter-events-admin">
 			<h1>
-				<?php esc_html_e( 'Generate Shelter Events', 'shelter-events' ); ?>
+				<?php esc_html_e( 'Generate Shelter Events', 'shelter-events-wrapper' ); ?>
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=tribe_events&page=shelter-events-help#staff-guide' ) ); ?>"
 					class="page-title-action">
-					<?php esc_html_e( 'Staff Guide & Help', 'shelter-events' ); ?>
+					<?php esc_html_e( 'Staff Guide & Help', 'shelter-events-wrapper' ); ?>
 				</a>
 			</h1>
 
@@ -224,8 +224,8 @@ class Shelter_Events_Admin {
 						$was_dry_run = '1' === sanitize_text_field( wp_unslash( $_GET['dry_run'] ?? '0' ) );
 						echo esc_html(
 							$was_dry_run
-								? __( 'Dry run complete — no events were created.', 'shelter-events' )
-								: __( 'Events generated successfully!', 'shelter-events' )
+								? __( 'Dry run complete — no events were created.', 'shelter-events-wrapper' )
+								: __( 'Events generated successfully!', 'shelter-events-wrapper' )
 						);
 						?>
 					</p>
@@ -234,7 +234,7 @@ class Shelter_Events_Admin {
 
 			<?php if ( isset( $_GET['blackout_updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'Global blackout dates saved.', 'shelter-events' ); ?></p>
+					<p><?php esc_html_e( 'Global blackout dates saved.', 'shelter-events-wrapper' ); ?></p>
 				</div>
 			<?php endif; ?>
 			<?php // phpcs:enable WordPress.Security.NonceVerification.Recommended ?>
@@ -242,14 +242,14 @@ class Shelter_Events_Admin {
 			<!-- Active Programs Overview -->
 			<div class="shelter-card">
 				<h2>
-					<?php esc_html_e( 'Active Programs', 'shelter-events' ); ?>
+					<?php esc_html_e( 'Active Programs', 'shelter-events-wrapper' ); ?>
 					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=shelter_program' ) ); ?>"
 						class="page-title-action">
-						<?php esc_html_e( 'Manage Programs', 'shelter-events' ); ?>
+						<?php esc_html_e( 'Manage Programs', 'shelter-events-wrapper' ); ?>
 					</a>
 					<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=shelter_program' ) ); ?>"
 						class="page-title-action">
-						<?php esc_html_e( 'Add New', 'shelter-events' ); ?>
+						<?php esc_html_e( 'Add New', 'shelter-events-wrapper' ); ?>
 					</a>
 				</h2>
 
@@ -259,7 +259,7 @@ class Shelter_Events_Admin {
 						echo wp_kses(
 							sprintf(
 								/* translators: %s = URL to add new program */
-								__( 'No active programs found. <a href="%s">Create one</a> to get started.', 'shelter-events' ),
+								__( 'No active programs found. <a href="%s">Create one</a> to get started.', 'shelter-events-wrapper' ),
 								esc_url( admin_url( 'post-new.php?post_type=shelter_program' ) )
 							),
 							[ 'a' => [ 'href' => [] ] ]
@@ -270,11 +270,11 @@ class Shelter_Events_Admin {
 					<table class="wp-list-table widefat fixed striped">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Program', 'shelter-events' ); ?></th>
-								<th><?php esc_html_e( 'Days', 'shelter-events' ); ?></th>
-								<th><?php esc_html_e( 'Time', 'shelter-events' ); ?></th>
-								<th><?php esc_html_e( 'Cost', 'shelter-events' ); ?></th>
-								<th><?php esc_html_e( 'Venue', 'shelter-events' ); ?></th>
+								<th><?php esc_html_e( 'Program', 'shelter-events-wrapper' ); ?></th>
+								<th><?php esc_html_e( 'Days', 'shelter-events-wrapper' ); ?></th>
+								<th><?php esc_html_e( 'Time', 'shelter-events-wrapper' ); ?></th>
+								<th><?php esc_html_e( 'Cost', 'shelter-events-wrapper' ); ?></th>
+								<th><?php esc_html_e( 'Venue', 'shelter-events-wrapper' ); ?></th>
 								<th></th>
 							</tr>
 						</thead>
@@ -295,12 +295,12 @@ class Shelter_Events_Admin {
 										<?php
 										$is_variable = ( $prog['meta']['_shelter_variable_pricing'] ?? 'no' ) === 'yes';
 										if ( $is_variable ) :
-											echo esc_html__( 'Varies', 'shelter-events' );
+											echo esc_html__( 'Varies', 'shelter-events-wrapper' );
 										else :
 											$cost = $prog['cost'];
 											echo esc_html(
 												( $cost === '0' || $cost === '' )
-													? __( 'Free', 'shelter-events' )
+													? __( 'Free', 'shelter-events-wrapper' )
 													: ( $prog['currency_symbol'] ?? '$' ) . $cost
 											);
 										endif;
@@ -309,7 +309,7 @@ class Shelter_Events_Admin {
 									<td><?php echo esc_html( $prog['venue']['venue'] ?? '—' ); ?></td>
 									<td>
 										<a href="<?php echo esc_url( get_edit_post_link( $prog['post_id'] ) ); ?>">
-											<?php esc_html_e( 'Edit', 'shelter-events' ); ?>
+											<?php esc_html_e( 'Edit', 'shelter-events-wrapper' ); ?>
 										</a>
 									</td>
 								</tr>
@@ -346,15 +346,15 @@ class Shelter_Events_Admin {
 			?>
 				<?php if ( ! empty( $upcoming ) ) : ?>
 					<div class="shelter-card">
-						<h2><?php esc_html_e( 'Upcoming Generated Events', 'shelter-events' ); ?></h2>
+						<h2><?php esc_html_e( 'Upcoming Generated Events', 'shelter-events-wrapper' ); ?></h2>
 						<table class="wp-list-table widefat fixed striped shelter-upcoming-events">
 							<thead>
 								<tr>
-									<th><?php esc_html_e( 'Event', 'shelter-events' ); ?></th>
-									<th><?php esc_html_e( 'Program', 'shelter-events' ); ?></th>
-									<th><?php esc_html_e( 'Date', 'shelter-events' ); ?></th>
-									<th><?php esc_html_e( 'Status', 'shelter-events' ); ?></th>
-									<th><?php esc_html_e( 'Actions', 'shelter-events' ); ?></th>
+									<th><?php esc_html_e( 'Event', 'shelter-events-wrapper' ); ?></th>
+									<th><?php esc_html_e( 'Program', 'shelter-events-wrapper' ); ?></th>
+									<th><?php esc_html_e( 'Date', 'shelter-events-wrapper' ); ?></th>
+									<th><?php esc_html_e( 'Status', 'shelter-events-wrapper' ); ?></th>
+									<th><?php esc_html_e( 'Actions', 'shelter-events-wrapper' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -379,26 +379,26 @@ class Shelter_Events_Admin {
 										<td>
 											<?php if ( $replaced_by ) : ?>
 												<span class="shelter-status shelter-status--replaced">
-													<?php esc_html_e( 'Replaced', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Replaced', 'shelter-events-wrapper' ); ?>
 												</span>
 											<?php elseif ( $cancelled ) : ?>
 												<span class="shelter-status shelter-status--cancelled">
-													<?php esc_html_e( 'Cancelled', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Cancelled', 'shelter-events-wrapper' ); ?>
 												</span>
 											<?php elseif ( $on_blackout ) : ?>
 												<span class="shelter-status shelter-status--blackout">
-													<?php esc_html_e( 'Blackout', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Blackout', 'shelter-events-wrapper' ); ?>
 												</span>
 											<?php else : ?>
 												<span class="shelter-status shelter-status--active">
-													<?php esc_html_e( 'Active', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Active', 'shelter-events-wrapper' ); ?>
 												</span>
 											<?php endif; ?>
 										</td>
 										<td class="shelter-event-actions">
 											<?php if ( $replaced_by ) : ?>
 												<a href="<?php echo esc_url( get_edit_post_link( $replaced_by ) ); ?>">
-													<?php esc_html_e( 'Edit Replacement', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Edit Replacement', 'shelter-events-wrapper' ); ?>
 												</a>
 											<?php elseif ( ! $cancelled ) : ?>
 												<?php
@@ -408,10 +408,10 @@ class Shelter_Events_Admin {
 												);
 												?>
 												<a href="<?php echo esc_url( $replace_url ); ?>" class="shelter-replace-action">
-													<?php esc_html_e( 'Replace', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Replace', 'shelter-events-wrapper' ); ?>
 												</a>
 												<a href="<?php echo esc_url( get_edit_post_link( $event->ID ) ); ?>">
-													<?php esc_html_e( 'Edit', 'shelter-events' ); ?>
+													<?php esc_html_e( 'Edit', 'shelter-events-wrapper' ); ?>
 												</a>
 											<?php endif; ?>
 										</td>
@@ -425,13 +425,13 @@ class Shelter_Events_Admin {
 
 			<!-- Generate Form -->
 			<div class="shelter-card">
-				<h2><?php esc_html_e( 'Generate Events', 'shelter-events' ); ?></h2>
+				<h2><?php esc_html_e( 'Generate Events', 'shelter-events-wrapper' ); ?></h2>
 				<?php if ( $next_cron ) : ?>
 					<p class="description">
 						<?php
 						printf(
 							/* translators: %s = formatted date and time of the next scheduled generation */
-							esc_html__( 'Next automatic generation: %s', 'shelter-events' ),
+							esc_html__( 'Next automatic generation: %s', 'shelter-events-wrapper' ),
 							esc_html( wp_date( 'F j, Y \a\t g:i A', $next_cron ) )
 						);
 						?>
@@ -443,10 +443,10 @@ class Shelter_Events_Admin {
 
 					<table class="form-table">
 						<tr>
-							<th><label for="program"><?php esc_html_e( 'Program', 'shelter-events' ); ?></label></th>
+							<th><label for="program"><?php esc_html_e( 'Program', 'shelter-events-wrapper' ); ?></label></th>
 							<td>
 								<select name="program" id="program">
-									<option value=""><?php esc_html_e( '— All Active Programs —', 'shelter-events' ); ?></option>
+									<option value=""><?php esc_html_e( '— All Active Programs —', 'shelter-events-wrapper' ); ?></option>
 									<?php foreach ( $programs as $prog ) : ?>
 										<option value="<?php echo esc_attr( $prog['slug'] ); ?>">
 											<?php echo esc_html( $prog['title'] ); ?>
@@ -456,7 +456,7 @@ class Shelter_Events_Admin {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="weeks"><?php esc_html_e( 'Weeks ahead', 'shelter-events' ); ?></label></th>
+							<th><label for="weeks"><?php esc_html_e( 'Weeks ahead', 'shelter-events-wrapper' ); ?></label></th>
 							<td>
 								<input type="number" name="weeks" id="weeks" min="1" max="52"
 									value="<?php echo esc_attr( (string) ( $gen['lookahead_weeks'] ?? 8 ) ); ?>"
@@ -464,25 +464,25 @@ class Shelter_Events_Admin {
 							</td>
 						</tr>
 						<tr>
-							<th><?php esc_html_e( 'Options', 'shelter-events' ); ?></th>
+							<th><?php esc_html_e( 'Options', 'shelter-events-wrapper' ); ?></th>
 							<td>
 								<label>
 									<input type="checkbox" name="dry_run" value="1" />
-									<?php esc_html_e( 'Dry run (preview only)', 'shelter-events' ); ?>
+									<?php esc_html_e( 'Dry run (preview only)', 'shelter-events-wrapper' ); ?>
 								</label>
 							</td>
 						</tr>
 					</table>
 
-					<?php submit_button( __( 'Generate Now', 'shelter-events' ), 'primary', 'submit', true ); ?>
+					<?php submit_button( __( 'Generate Now', 'shelter-events-wrapper' ), 'primary', 'submit', true ); ?>
 				</form>
 			</div>
 
 			<!-- Global Blackout Dates -->
 			<div class="shelter-card">
-				<h2><?php esc_html_e( 'Global Blackout Dates', 'shelter-events' ); ?></h2>
+				<h2><?php esc_html_e( 'Global Blackout Dates', 'shelter-events-wrapper' ); ?></h2>
 				<p class="description" style="margin-top:0;">
-					<?php esc_html_e( 'Events will not be generated on these dates for any program. Individual programs can also have their own blackout dates in their settings.', 'shelter-events' ); ?>
+					<?php esc_html_e( 'Events will not be generated on these dates for any program. Individual programs can also have their own blackout dates in their settings.', 'shelter-events-wrapper' ); ?>
 				</p>
 
 				<form method="post">
@@ -496,16 +496,16 @@ class Shelter_Events_Admin {
 					<div class="shelter-blackout-layout">
 						<div class="shelter-blackout-layout__input">
 							<textarea name="shelter_blackout_dates" rows="8" class="widefat"
-								placeholder="<?php esc_attr_e( "2026-12-25\n2026-11-26\n2026-01-01", 'shelter-events' ); ?>"
+								placeholder="<?php esc_attr_e( "2026-12-25\n2026-11-26\n2026-01-01", 'shelter-events-wrapper' ); ?>"
 							><?php echo esc_textarea( $dates_text ); ?></textarea>
 							<span class="description">
-								<?php esc_html_e( 'YYYY-MM-DD format, one date per line.', 'shelter-events' ); ?>
+								<?php esc_html_e( 'YYYY-MM-DD format, one date per line.', 'shelter-events-wrapper' ); ?>
 							</span>
 						</div>
 
 						<?php if ( ! empty( $global_dates ) ) : ?>
 							<div class="shelter-blackout-layout__summary">
-								<strong><?php esc_html_e( 'Current blackout dates:', 'shelter-events' ); ?></strong>
+								<strong><?php esc_html_e( 'Current blackout dates:', 'shelter-events-wrapper' ); ?></strong>
 								<ul class="shelter-blackout-list">
 									<?php foreach ( $global_dates as $d ) :
 										$dt = \DateTime::createFromFormat( 'Y-m-d', $d );
@@ -523,18 +523,18 @@ class Shelter_Events_Admin {
 						<?php endif; ?>
 					</div>
 
-					<?php submit_button( __( 'Save Blackout Dates', 'shelter-events' ), 'secondary', 'submit', true ); ?>
+					<?php submit_button( __( 'Save Blackout Dates', 'shelter-events-wrapper' ), 'secondary', 'submit', true ); ?>
 				</form>
 			</div>
 
 			<!-- Results -->
 			<?php if ( is_array( $results ) && ! empty( $results['programs'] ?? [] ) ) : ?>
 				<div class="shelter-card">
-					<h2><?php esc_html_e( 'Last Generation Results', 'shelter-events' ); ?></h2>
+					<h2><?php esc_html_e( 'Last Generation Results', 'shelter-events-wrapper' ); ?></h2>
 					<?php foreach ( $results['programs'] as $slug => $events ) : ?>
 						<h3><?php echo esc_html( $slug ); ?></h3>
 						<?php if ( empty( $events ) ) : ?>
-							<p class="description"><?php esc_html_e( 'No new events needed (all dates already exist).', 'shelter-events' ); ?></p>
+							<p class="description"><?php esc_html_e( 'No new events needed (all dates already exist).', 'shelter-events-wrapper' ); ?></p>
 						<?php else : ?>
 							<ul class="shelter-results-list">
 								<?php foreach ( $events as $event ) : ?>
@@ -542,10 +542,10 @@ class Shelter_Events_Admin {
 										<?php echo esc_html( $event['date'] ); ?>
 										<?php if ( isset( $event['event_id'] ) ) : ?>
 											— <a href="<?php echo esc_url( get_edit_post_link( $event['event_id'] ) ); ?>">
-												<?php esc_html_e( 'Edit', 'shelter-events' ); ?>
+												<?php esc_html_e( 'Edit', 'shelter-events-wrapper' ); ?>
 											</a>
 										<?php else : ?>
-											<em><?php esc_html_e( '(dry run)', 'shelter-events' ); ?></em>
+											<em><?php esc_html_e( '(dry run)', 'shelter-events-wrapper' ); ?></em>
 										<?php endif; ?>
 									</li>
 								<?php endforeach; ?>

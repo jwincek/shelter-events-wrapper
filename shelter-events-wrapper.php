@@ -11,7 +11,7 @@
  * Author URI: https://vcpahumane.org
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: shelter-events
+ * Text Domain: shelter-events-wrapper
  *
  * @package Shelter_Events
  */
@@ -89,7 +89,7 @@ function shelter_events_init(): void {
 		add_action( 'admin_notices', function (): void {
 			printf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				esc_html__( 'Shelter Events Wrapper requires The Events Calendar plugin to be installed and activated.', 'shelter-events' )
+				esc_html__( 'Shelter Events Wrapper requires The Events Calendar plugin to be installed and activated.', 'shelter-events-wrapper' )
 			);
 		} );
 		return;
@@ -111,8 +111,8 @@ function shelter_events_init(): void {
 	if ( function_exists( 'wp_register_ability_category' ) ) {
 		add_action( 'wp_abilities_api_categories_init', function (): void {
 			wp_register_ability_category( 'shelter-events', [
-				'label'       => __( 'Shelter Events', 'shelter-events' ),
-				'description' => __( 'Animal shelter event management operations.', 'shelter-events' ),
+				'label'       => __( 'Shelter Events', 'shelter-events-wrapper' ),
+				'description' => __( 'Animal shelter event management operations.', 'shelter-events-wrapper' ),
 			] );
 		} );
 		add_action( 'wp_abilities_api_init', [ \Shelter_Events\Abilities\Provider::class, 'register' ] );
@@ -139,7 +139,7 @@ function shelter_events_init(): void {
 			return $cost;
 		}
 		$variable = get_post_meta( $post_id, '_shelter_variable_pricing', true );
-		return ( $variable === 'yes' ) ? __( 'Varies', 'shelter-events' ) : $cost;
+		return ( $variable === 'yes' ) ? __( 'Varies', 'shelter-events-wrapper' ) : $cost;
 	}, 10, 2 );
 
 	// 10. Front-end assets.

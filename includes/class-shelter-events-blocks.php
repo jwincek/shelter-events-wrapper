@@ -57,7 +57,7 @@ class Shelter_Events_Blocks {
 	public function render_event_list( array $attributes ): string {
 		if ( ! function_exists( 'tribe_events' ) ) {
 			return '<p class="shelter-events-error">' .
-				esc_html__( 'The Events Calendar is required.', 'shelter-events' ) .
+				esc_html__( 'The Events Calendar is required.', 'shelter-events-wrapper' ) .
 				'</p>';
 		}
 
@@ -84,7 +84,7 @@ class Shelter_Events_Blocks {
 
 		if ( empty( $events ) ) {
 			return '<p class="shelter-events-empty">' .
-				esc_html__( 'No upcoming events scheduled.', 'shelter-events' ) .
+				esc_html__( 'No upcoming events scheduled.', 'shelter-events-wrapper' ) .
 				'</p>';
 		}
 
@@ -141,7 +141,7 @@ class Shelter_Events_Blocks {
 							<?php if ( ! empty( $attributes['showCost'] ) ) :
 								$variable = get_post_meta( $event_id, '_shelter_variable_pricing', true );
 								$cost_display = ( $variable === 'yes' )
-									? __( 'Varies', 'shelter-events' )
+									? __( 'Varies', 'shelter-events-wrapper' )
 									: tribe_get_cost( $event_id, true );
 							?>
 								<span class="shelter-event-item__cost">
@@ -152,7 +152,7 @@ class Shelter_Events_Blocks {
 
 						<?php if ( $cancelled ) : ?>
 							<span class="shelter-event-item__badge shelter-event-item__badge--cancelled">
-								<?php esc_html_e( 'Cancelled', 'shelter-events' ); ?>
+								<?php esc_html_e( 'Cancelled', 'shelter-events-wrapper' ); ?>
 							</span>
 						<?php endif; ?>
 					</div>
