@@ -15,10 +15,14 @@ class Shelter_Events_Admin {
 	/** @var string Option key for global blackout dates. */
 	public const BLACKOUT_OPTION = 'shelter_events_blackout_dates';
 
+	/** @var string Option key for the uninstall data-removal opt-in. */
+	public const DELETE_DATA_OPTION = 'shelter_events_delete_data_on_uninstall';
+
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_menu_page' ] );
 		add_action( 'admin_init', [ $this, 'handle_generate_action' ] );
 		add_action( 'admin_init', [ $this, 'handle_blackout_save' ] );
+		add_action( 'admin_init', [ $this, 'handle_uninstall_setting_save' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'admin_post_shelter_replace_event', [ $this, 'handle_replace_action' ] );
 		add_filter( 'post_row_actions', [ $this, 'add_replace_row_action' ], 10, 2 );
@@ -98,6 +102,33 @@ class Shelter_Events_Admin {
 		wp_safe_redirect( add_query_arg( [
 			'page'             => 'shelter-events-generate',
 			'blackout_updated' => '1',
+		], admin_url( 'edit.php?post_type=tribe_events' ) ) );
+		exit;
+	}
+
+	/**
+	 * Save the uninstall data-removal opt-in from the Generate Events page.
+	 */
+	public function handle_uninstall_setting_save(): void {
+		if ( ! isset( $_POST['shelter_uninstall_nonce'] ) ) {
+			return;
+		}
+
+		$nonce = sanitize_text_field( wp_unslash( $_POST['shelter_uninstall_nonce'] ) );
+
+		if ( ! wp_verify_nonce( $nonce, 'shelter_save_uninstall_setting' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'shelter-events-wrapper' ) );
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'shelter-events-wrapper' ) );
+		}
+
+		update_option( self::DELETE_DATA_OPTION, ! empty( $_POST['shelter_delete_data_on_uninstall'] ) );
+
+		wp_safe_redirect( add_query_arg( [
+			'page'             => 'shelter-events-generate',
+			'settings_updated' => '1',
 		], admin_url( 'edit.php?post_type=tribe_events' ) ) );
 		exit;
 	}
@@ -235,6 +266,12 @@ class Shelter_Events_Admin {
 			<?php if ( isset( $_GET['blackout_updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Global blackout dates saved.', 'shelter-events-wrapper' ); ?></p>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( isset( $_GET['settings_updated'] ) ) : ?>
+				<div class="notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'Settings saved.', 'shelter-events-wrapper' ); ?></p>
 				</div>
 			<?php endif; ?>
 			<?php // phpcs:enable WordPress.Security.NonceVerification.Recommended ?>
@@ -524,6 +561,26 @@ class Shelter_Events_Admin {
 					</div>
 
 					<?php submit_button( __( 'Save Blackout Dates', 'shelter-events-wrapper' ), 'secondary', 'submit', true ); ?>
+				</form>
+			</div>
+
+			<!-- Uninstall Options -->
+			<div class="shelter-card">
+				<h2><?php esc_html_e( 'Uninstall Options', 'shelter-events-wrapper' ); ?></h2>
+
+				<form method="post">
+					<?php wp_nonce_field( 'shelter_save_uninstall_setting', 'shelter_uninstall_nonce' ); ?>
+
+					<label>
+						<input type="checkbox" name="shelter_delete_data_on_uninstall" value="1"
+							<?php checked( (bool) get_option( self::DELETE_DATA_OPTION ) ); ?> />
+						<?php esc_html_e( 'Delete all data when this plugin is deleted', 'shelter-events-wrapper' ); ?>
+					</label>
+					<p class="description">
+						<?php esc_html_e( 'When enabled, deleting the plugin removes all programs, generated events, blackout dates, and settings. When disabled (default), your data is preserved.', 'shelter-events-wrapper' ); ?>
+					</p>
+
+					<?php submit_button( __( 'Save Settings', 'shelter-events-wrapper' ), 'secondary', 'submit', true ); ?>
 				</form>
 			</div>
 
